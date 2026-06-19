@@ -50,7 +50,7 @@ export function CommandBar() {
   const [showTilt, setShowTilt] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const { stats, author } = galaxyData;
+  const { stats } = galaxyData;
 
   const filtersActive = isFiltersActive(filters);
   const totalPapers = galaxyData.papers.length;
@@ -252,7 +252,7 @@ export function CommandBar() {
           <Stat label="Citations" value={stats.totalCitations.toLocaleString()} />
           <Stat label="Co-authors" value={stats.uniqueCoAuthors.toLocaleString()} />
           <Stat label="Years" value={String(stats.yearsActive)} />
-          <Stat label="h-index" value={author.hIndex != null ? String(author.hIndex) : "—"} />
+          <Stat label="Words" value={compactNumber(stats.estimatedWords)} />
         </div>
 
         <div className="hidden md:block w-[2px] self-stretch bg-edge/60" />
@@ -312,6 +312,10 @@ export function CommandBar() {
       </motion.div>
     </div>
   );
+}
+
+function compactNumber(n: number): string {
+  return new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 }).format(n);
 }
 
 function Chip({
