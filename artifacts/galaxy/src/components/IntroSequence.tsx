@@ -39,7 +39,7 @@ export function IntroSequence() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 2, ease: "easeOut" }}
         >
-          Galaxy
+          Galactic
         </motion.h1>
 
         <motion.div

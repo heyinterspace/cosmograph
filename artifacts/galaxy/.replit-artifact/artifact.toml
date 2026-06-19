@@ -1,6 +1,6 @@
 kind = "web"
 previewPath = "/"
-title = "Galaxy"
+title = "Galactic"
 version = "1.0.0"
 id = "artifacts/galaxy"
 router = "path"

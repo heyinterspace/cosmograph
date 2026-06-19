@@ -5,6 +5,7 @@ import { DetailPanel } from "./DetailPanel";
 import { CommandBar } from "./CommandBar";
 import { FilteredPapersPanel } from "./FilteredPapersPanel";
 import { TourOverlay } from "./TourOverlay";
+import { FlyHud } from "./FlyHud";
 import { galaxyData } from "@/data/galaxy";
 import { Compass } from "lucide-react";
 
@@ -68,6 +69,7 @@ export function Overlay() {
               </AnimatePresence>
 
               <CommandBar />
+              <FlyHud />
             </>
           )}
           <TourOverlay />
@@ -83,7 +85,7 @@ function Header() {
   return (
     <div className="absolute top-0 left-0 right-0 p-6 flex items-start justify-between">
       <div className="pointer-events-none">
-        <h1 className="text-3xl font-title font-medium italic tracking-tight text-ink">Galaxy</h1>
+        <h1 className="text-3xl font-title font-medium italic tracking-tight text-ink">Galactic</h1>
         <p className="text-ink-dim font-mono text-[11px] mt-1 uppercase tracking-widest">
           A Legacy of Innovation · {galaxyData.author.name}
         </p>

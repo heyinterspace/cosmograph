@@ -45,6 +45,7 @@ export function CameraController() {
     const e = new THREE.Euler().setFromQuaternion(camera.quaternion, "YXZ");
     yaw.current = e.y;
     pitch.current = e.x;
+    velocity.current.set(0, 0, 0);
   }, [cameraMode, camera]);
 
   useEffect(() => {

@@ -103,7 +103,7 @@ export function CommandBar() {
             className="glass-panel mb-3 p-4"
           >
             <div className="flex items-center justify-between mb-2">
-              <span className="font-mono text-[11px] uppercase tracking-widest text-ink-dim">Galaxy Tilt</span>
+              <span className="font-mono text-[11px] uppercase tracking-widest text-ink-dim">Galactic Tilt</span>
               <span className="font-mono text-[11px] text-ink">{Math.round((galaxyTilt * 180) / Math.PI)}°</span>
             </div>
             <input
@@ -293,7 +293,7 @@ export function CommandBar() {
           <button
             onClick={() => setShowTilt((s) => !s)}
             disabled={cameraMode !== "god"}
-            title="Galaxy tilt"
+            title="Galactic tilt"
             className={`flex items-center justify-center h-11 w-11 md:h-9 md:w-9 border-2 border-edge transition-all disabled:opacity-30 ${
               showTilt && cameraMode === "god" ? "bg-accent text-accent-foreground" : "bg-white/5 text-ink hover:bg-white/10"
             }`}

@@ -1,6 +1,6 @@
-# Galaxy
+# Galactic
 
-An immersive 3D website that visualizes the lifetime scientific work of Dr. Mahendra S. Rao as an explorable galaxy — research domains as suns, papers as orbiting planets, co-authors as moons. Built as a Father's Day gift.
+An immersive 3D website (galactic.dad) that visualizes the lifetime scientific work of Dr. Mahendra S. Rao as an explorable galaxy — research domains as suns, papers as orbiting planets, co-authors as moons. Built as a Father's Day gift. (Internal package/slug remains `galaxy`.)
 
 ## Run & Operate
 
