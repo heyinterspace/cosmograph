@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Orbit, Compass, SlidersHorizontal, Sun, Globe2, X, Filter } from "lucide-react";
+import { Search, Orbit, Compass, Axis3d, Sun, Globe2, X, Filter } from "lucide-react";
 import { useAppState } from "@/lib/store";
 import {
   galaxyData,
@@ -294,7 +294,7 @@ export function CommandBar() {
               showTilt && cameraMode === "god" ? "bg-accent text-accent-foreground" : "bg-white/5 text-ink hover:bg-white/10"
             }`}
           >
-            <SlidersHorizontal size={15} />
+            <Axis3d size={15} />
           </button>
           <ModeButton
             active={cameraMode === "god"}
