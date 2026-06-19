@@ -1,8 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Orbit, Compass, SlidersHorizontal, Sun, Globe2, X } from "lucide-react";
+import { Search, Orbit, Compass, SlidersHorizontal, Sun, Globe2, X, Filter } from "lucide-react";
 import { useAppState } from "@/lib/store";
-import { galaxyData } from "@/data/galaxy";
+import {
+  galaxyData,
+  yearRange,
+  maxCitations,
+  isFiltersActive,
+  countMatchingPapers,
+} from "@/data/galaxy";
 
 interface SearchResult {
   type: "sun" | "planet";
@@ -29,12 +35,31 @@ const searchIndex: { type: "sun" | "planet"; id: string; title: string; subtitle
 ];
 
 export function CommandBar() {
-  const { cameraMode, setCameraMode, galaxyTilt, setGalaxyTilt, setSelectedObject, setSearchActive } =
-    useAppState();
+  const {
+    cameraMode,
+    setCameraMode,
+    galaxyTilt,
+    setGalaxyTilt,
+    setSelectedObject,
+    setSearchActive,
+    filters,
+    setFilters,
+    resetFilters,
+  } = useAppState();
   const [query, setQuery] = useState("");
   const [showTilt, setShowTilt] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const { stats, author } = galaxyData;
+
+  const filtersActive = isFiltersActive(filters);
+  const totalPapers = galaxyData.papers.length;
+  const matchCount = useMemo(
+    () => (filtersActive ? countMatchingPapers(filters) : totalPapers),
+    [filters, filtersActive, totalPapers],
+  );
+  const minYear = filters.minYear ?? yearRange.min;
+  const maxYear = filters.maxYear ?? yearRange.max;
 
   const results: SearchResult[] = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -59,6 +84,7 @@ export function CommandBar() {
     setCameraMode("god");
     setSelectedObject({ type: r.type, id: r.id });
     setQuery("");
+    setShowFilters(false);
     inputRef.current?.blur();
   };
 
@@ -85,6 +111,102 @@ export function CommandBar() {
               onChange={(e) => setGalaxyTilt(parseFloat(e.target.value))}
               className="w-full h-1.5 bg-white/15 appearance-none cursor-pointer accent-accent"
             />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showFilters && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            className="glass-panel mb-3 p-4 flex flex-col gap-5 max-h-[46vh] overflow-y-auto custom-scrollbar"
+          >
+            <div className="flex items-center justify-between">
+              <span className="font-display text-xs uppercase tracking-wider text-ink">Filters</span>
+              <span className={`font-mono text-[11px] ${filtersActive ? "text-accent" : "text-ink-dim"}`}>
+                {filtersActive ? `${matchCount}/${totalPapers}` : totalPapers} papers
+              </span>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-mono text-[11px] uppercase tracking-widest text-ink-dim">Year Range</span>
+                <span className="font-mono text-[11px] text-ink">
+                  {minYear}–{maxYear}
+                </span>
+              </div>
+              <div className="flex flex-col gap-2">
+                <input
+                  type="range"
+                  min={yearRange.min}
+                  max={yearRange.max}
+                  step={1}
+                  value={minYear}
+                  onChange={(e) => {
+                    const v = parseInt(e.target.value, 10);
+                    setFilters({ minYear: v <= yearRange.min ? null : Math.min(v, maxYear) });
+                  }}
+                  className="w-full h-1.5 bg-white/15 appearance-none cursor-pointer accent-accent"
+                />
+                <input
+                  type="range"
+                  min={yearRange.min}
+                  max={yearRange.max}
+                  step={1}
+                  value={maxYear}
+                  onChange={(e) => {
+                    const v = parseInt(e.target.value, 10);
+                    setFilters({ maxYear: v >= yearRange.max ? null : Math.max(v, minYear) });
+                  }}
+                  className="w-full h-1.5 bg-white/15 appearance-none cursor-pointer accent-accent"
+                />
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-mono text-[11px] uppercase tracking-widest text-ink-dim">Min Citations</span>
+                <span className="font-mono text-[11px] text-ink">{filters.minCitations.toLocaleString()}</span>
+              </div>
+              <input
+                type="range"
+                min={0}
+                max={maxCitations}
+                step={Math.max(1, Math.round(maxCitations / 200))}
+                value={filters.minCitations}
+                onChange={(e) => setFilters({ minCitations: parseInt(e.target.value, 10) })}
+                className="w-full h-1.5 bg-white/15 appearance-none cursor-pointer accent-accent"
+              />
+            </div>
+
+            <div>
+              <span className="font-mono text-[11px] uppercase tracking-widest text-ink-dim">Domain</span>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                <Chip active={filters.domainId === null} onClick={() => setFilters({ domainId: null })}>
+                  All
+                </Chip>
+                {galaxyData.domains.map((d) => (
+                  <Chip
+                    key={d.id}
+                    active={filters.domainId === d.id}
+                    onClick={() => setFilters({ domainId: filters.domainId === d.id ? null : d.id })}
+                  >
+                    {d.name}
+                  </Chip>
+                ))}
+              </div>
+            </div>
+
+            {filtersActive && (
+              <button
+                onClick={resetFilters}
+                className="self-start flex items-center gap-1.5 font-display text-xs uppercase tracking-wider text-accent hover:text-ink transition-colors"
+              >
+                <X size={13} /> Reset filters
+              </button>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
@@ -153,6 +275,18 @@ export function CommandBar() {
 
         <div className="flex items-center gap-1.5 shrink-0">
           <button
+            onClick={() => setShowFilters((s) => !s)}
+            title="Filters"
+            className={`relative flex items-center justify-center h-11 w-11 md:h-9 md:w-9 border-2 border-edge transition-all ${
+              showFilters || filtersActive ? "bg-accent text-accent-foreground" : "bg-white/5 text-ink hover:bg-white/10"
+            }`}
+          >
+            <Filter size={15} />
+            {filtersActive && !showFilters && (
+              <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-accent ring-2 ring-black" />
+            )}
+          </button>
+          <button
             onClick={() => setShowTilt((s) => !s)}
             disabled={cameraMode !== "god"}
             title="Galaxy tilt"
@@ -177,6 +311,27 @@ export function CommandBar() {
         </div>
       </motion.div>
     </div>
+  );
+}
+
+function Chip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`px-3 py-2 sm:py-1.5 border-2 border-edge font-mono text-[11px] transition-all ${
+        active ? "bg-accent text-accent-foreground" : "bg-white/5 text-ink hover:bg-white/10"
+      }`}
+    >
+      {children}
+    </button>
   );
 }
 

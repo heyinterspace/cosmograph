@@ -1,5 +1,5 @@
-import { useFrame } from "@react-three/fiber";
-import { OrbitControls, PointerLockControls } from "@react-three/drei";
+import { useFrame, useThree } from "@react-three/fiber";
+import { OrbitControls } from "@react-three/drei";
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { useAppState } from "@/lib/store";
@@ -9,6 +9,8 @@ const HOME_POS = new THREE.Vector3(0, 1100, 1700);
 
 export function CameraController() {
   const { cameraMode, selectedObject } = useAppState();
+  const camera = useThree((s) => s.camera);
+  const gl = useThree((s) => s.gl);
   const orbitRef = useRef<any>(null);
 
   const targetPosition = useRef(new THREE.Vector3().copy(HOME_POS));
@@ -29,6 +31,20 @@ export function CameraController() {
   const keys = useRef({ forward: false, backward: false, left: false, right: false });
   const velocity = useRef(new THREE.Vector3());
   const direction = useRef(new THREE.Vector3());
+
+  // Drag-to-look orientation for fly mode (no pointer lock, cursor stays visible).
+  const yaw = useRef(0);
+  const pitch = useRef(0);
+  const dragging = useRef(false);
+  const last = useRef({ x: 0, y: 0 });
+
+  // Seed look angles from the current camera orientation when entering fly mode.
+  useEffect(() => {
+    if (cameraMode !== "spaceship") return;
+    const e = new THREE.Euler().setFromQuaternion(camera.quaternion, "YXZ");
+    yaw.current = e.y;
+    pitch.current = e.x;
+  }, [cameraMode, camera]);
 
   useEffect(() => {
     const isTyping = () => {
@@ -68,6 +84,46 @@ export function CameraController() {
       window.removeEventListener("keyup", handleKeyUp);
     };
   }, [cameraMode]);
+
+  // Mouse-drag look for fly mode.
+  useEffect(() => {
+    if (cameraMode !== "spaceship") return;
+    const el = gl.domElement;
+    const sens = 0.0025;
+    const limit = Math.PI / 2 - 0.05;
+
+    const onDown = (e: PointerEvent) => {
+      if (e.button !== 0) return;
+      dragging.current = true;
+      last.current = { x: e.clientX, y: e.clientY };
+      el.style.cursor = "grabbing";
+    };
+    const onMove = (e: PointerEvent) => {
+      if (!dragging.current) return;
+      const dx = e.clientX - last.current.x;
+      const dy = e.clientY - last.current.y;
+      last.current = { x: e.clientX, y: e.clientY };
+      yaw.current -= dx * sens;
+      pitch.current -= dy * sens;
+      pitch.current = Math.max(-limit, Math.min(limit, pitch.current));
+    };
+    const onUp = () => {
+      dragging.current = false;
+      el.style.cursor = "grab";
+    };
+
+    el.style.cursor = "grab";
+    el.addEventListener("pointerdown", onDown);
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    return () => {
+      el.style.cursor = "";
+      dragging.current = false;
+      el.removeEventListener("pointerdown", onDown);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+    };
+  }, [cameraMode, gl]);
 
   useFrame((state, delta) => {
     if (cameraMode === "god") {
@@ -115,6 +171,11 @@ export function CameraController() {
       }
       if (orbit) orbit.update();
     } else if (cameraMode === "spaceship") {
+      // Apply drag-look orientation.
+      state.camera.quaternion.setFromEuler(
+        new THREE.Euler(pitch.current, yaw.current, 0, "YXZ"),
+      );
+
       const speed = 600.0 * delta;
 
       direction.current.z = Number(keys.current.forward) - Number(keys.current.backward);
@@ -132,7 +193,7 @@ export function CameraController() {
   });
 
   if (cameraMode === "spaceship") {
-    return <PointerLockControls selector="#root" />;
+    return null;
   }
 
   return (
