@@ -74,7 +74,7 @@ export function IntroSequence() {
           onClick={() => setIntroFinished(true)}
           className="glass-panel glass-panel-interactive mt-16 px-8 py-3 bg-accent text-accent-foreground font-display text-sm uppercase tracking-[0.2em]"
         >
-          Enter the Galaxy
+          Ad Astra
         </motion.button>
       </div>
     </motion.div>
