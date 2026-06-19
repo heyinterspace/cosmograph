@@ -8,7 +8,7 @@ import { FilteredPapersPanel } from "./FilteredPapersPanel";
 import { galaxyData } from "@/data/galaxy";
 
 export function Overlay() {
-  const { introFinished, selectedObject, hoveredObject } = useAppState();
+  const { introFinished, selectedObject, hoveredObject, searchActive } = useAppState();
 
   return (
     <div className="absolute inset-0 pointer-events-none z-10">
@@ -56,7 +56,11 @@ export function Overlay() {
 
           <AnimatePresence>
             {selectedObject && (
-              <div className="absolute top-24 right-5 w-[min(384px,calc(100vw-2.5rem))] max-h-[calc(100vh-13rem)] overflow-y-auto custom-scrollbar pointer-events-auto">
+              <div
+                className={`absolute z-30 inset-x-3 bottom-24 max-h-[38vh] md:inset-x-auto md:bottom-auto md:top-24 md:right-5 md:w-[min(384px,calc(100vw-2.5rem))] md:max-h-[calc(100vh-13rem)] md:!block overflow-y-auto custom-scrollbar pointer-events-auto ${
+                  searchActive ? "hidden" : "block"
+                }`}
+              >
                 <DetailPanel />
               </div>
             )}

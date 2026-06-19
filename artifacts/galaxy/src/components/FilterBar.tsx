@@ -47,7 +47,7 @@ export function FilterBar() {
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
-            className="glass-panel p-4 flex flex-col gap-5 max-h-[calc(100vh-13rem)] overflow-y-auto custom-scrollbar"
+            className="glass-panel p-4 flex flex-col gap-5 max-h-[30vh] md:max-h-[calc(100vh-13rem)] overflow-y-auto custom-scrollbar"
           >
             <div>
               <div className="flex items-center justify-between mb-2">
@@ -67,7 +67,7 @@ export function FilterBar() {
                     const v = parseInt(e.target.value, 10);
                     setFilters({ minYear: v <= yearRange.min ? null : Math.min(v, maxYear) });
                   }}
-                  className="w-full h-1 bg-white/15 appearance-none cursor-pointer accent-accent"
+                  className="w-full h-1.5 bg-white/15 appearance-none cursor-pointer accent-accent"
                 />
                 <input
                   type="range"
@@ -79,7 +79,7 @@ export function FilterBar() {
                     const v = parseInt(e.target.value, 10);
                     setFilters({ maxYear: v >= yearRange.max ? null : Math.max(v, minYear) });
                   }}
-                  className="w-full h-1 bg-white/15 appearance-none cursor-pointer accent-accent"
+                  className="w-full h-1.5 bg-white/15 appearance-none cursor-pointer accent-accent"
                 />
               </div>
             </div>
@@ -96,7 +96,7 @@ export function FilterBar() {
                 step={Math.max(1, Math.round(maxCitations / 200))}
                 value={filters.minCitations}
                 onChange={(e) => setFilters({ minCitations: parseInt(e.target.value, 10) })}
-                className="w-full h-1 bg-white/15 appearance-none cursor-pointer accent-accent"
+                className="w-full h-1.5 bg-white/15 appearance-none cursor-pointer accent-accent"
               />
             </div>
 
@@ -145,7 +145,7 @@ function Chip({
   return (
     <button
       onClick={onClick}
-      className={`px-3 py-1.5 border-2 border-edge font-mono text-[11px] transition-all ${
+      className={`px-3 py-2 sm:py-1.5 border-2 border-edge font-mono text-[11px] transition-all ${
         active ? "bg-accent text-accent-foreground" : "bg-white/5 text-ink hover:bg-white/10"
       }`}
     >

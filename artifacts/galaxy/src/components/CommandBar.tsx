@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Orbit, Compass, SlidersHorizontal, Sun, Globe2, X } from "lucide-react";
 import { useAppState } from "@/lib/store";
@@ -29,7 +29,8 @@ const searchIndex: { type: "sun" | "planet"; id: string; title: string; subtitle
 ];
 
 export function CommandBar() {
-  const { cameraMode, setCameraMode, galaxyTilt, setGalaxyTilt, setSelectedObject } = useAppState();
+  const { cameraMode, setCameraMode, galaxyTilt, setGalaxyTilt, setSelectedObject, setSearchActive } =
+    useAppState();
   const [query, setQuery] = useState("");
   const [showTilt, setShowTilt] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -47,6 +48,12 @@ export function CommandBar() {
     }
     return out;
   }, [query]);
+
+  useEffect(() => {
+    setSearchActive(results.length > 0);
+  }, [results.length, setSearchActive]);
+
+  useEffect(() => () => setSearchActive(false), [setSearchActive]);
 
   const pick = (r: SearchResult) => {
     setCameraMode("god");
@@ -76,7 +83,7 @@ export function CommandBar() {
               step={0.01}
               value={galaxyTilt}
               onChange={(e) => setGalaxyTilt(parseFloat(e.target.value))}
-              className="w-full h-1 bg-white/15 appearance-none cursor-pointer accent-accent"
+              className="w-full h-1.5 bg-white/15 appearance-none cursor-pointer accent-accent"
             />
           </motion.div>
         )}
@@ -88,13 +95,13 @@ export function CommandBar() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 8 }}
-            className="glass-panel mb-3 max-h-[46vh] overflow-y-auto custom-scrollbar"
+            className="glass-panel mb-3 max-h-[34vh] md:max-h-[46vh] overflow-y-auto custom-scrollbar"
           >
             {results.map((r) => (
               <button
                 key={`${r.type}-${r.id}`}
                 onClick={() => pick(r)}
-                className="flex w-full items-center gap-3 px-4 py-2.5 text-left border-b border-white/8 last:border-0 hover:bg-accent/15 transition-colors"
+                className="flex w-full items-center gap-3 px-4 py-3 md:py-2.5 text-left border-b border-white/8 last:border-0 hover:bg-accent/15 transition-colors"
               >
                 {r.type === "sun" ? (
                   <Sun size={15} className="shrink-0 text-accent" />
@@ -149,7 +156,7 @@ export function CommandBar() {
             onClick={() => setShowTilt((s) => !s)}
             disabled={cameraMode !== "god"}
             title="Galaxy tilt"
-            className={`flex items-center justify-center h-9 w-9 border-2 border-edge transition-all disabled:opacity-30 ${
+            className={`flex items-center justify-center h-11 w-11 md:h-9 md:w-9 border-2 border-edge transition-all disabled:opacity-30 ${
               showTilt && cameraMode === "god" ? "bg-accent text-accent-foreground" : "bg-white/5 text-ink hover:bg-white/10"
             }`}
           >
@@ -196,7 +203,7 @@ function ModeButton({
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-1.5 h-9 px-3 border-2 border-edge font-display text-xs uppercase tracking-wider transition-all ${
+      className={`flex items-center gap-1.5 h-11 md:h-9 px-3 border-2 border-edge font-display text-xs uppercase tracking-wider transition-all ${
         active ? "bg-accent text-accent-foreground" : "bg-white/5 text-ink hover:bg-white/10"
       }`}
     >
