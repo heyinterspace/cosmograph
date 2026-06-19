@@ -14,6 +14,18 @@ export function CameraController() {
   const targetPosition = useRef(new THREE.Vector3().copy(HOME_POS));
   const targetLookAt = useRef(new THREE.Vector3());
 
+  // Fly-to animation runs only briefly after a selection changes; afterwards we
+  // hand control back to OrbitControls so scroll-to-zoom and orbit work freely.
+  const focusing = useRef(false);
+  const focusElapsed = useRef(0);
+
+  useEffect(() => {
+    if (cameraMode !== "god") return;
+    focusing.current = true;
+    focusElapsed.current = 0;
+    if (orbitRef.current) orbitRef.current.enabled = false;
+  }, [cameraMode, selectedObject?.type, selectedObject?.id]);
+
   const keys = useRef({ forward: false, backward: false, left: false, right: false });
   const velocity = useRef(new THREE.Vector3());
   const direction = useRef(new THREE.Vector3());
@@ -59,34 +71,49 @@ export function CameraController() {
 
   useFrame((state, delta) => {
     if (cameraMode === "god") {
+      const orbit = orbitRef.current;
+      const worldPos = new THREE.Vector3();
+      let hasTarget = false;
+      let offset = new THREE.Vector3(0, 30, 60);
+
       if (selectedObject) {
-        const worldPos = new THREE.Vector3();
-        let offset = new THREE.Vector3(0, 30, 60);
         if (selectedObject.type === "sun") {
           const sun = sunRefs[selectedObject.id];
-          if (sun) sun.getWorldPosition(worldPos);
+          if (sun) {
+            sun.getWorldPosition(worldPos);
+            hasTarget = worldPos.lengthSq() > 0;
+          }
           const r = sunRadii[selectedObject.id] || 20;
           offset = new THREE.Vector3(0, r * 4 + 30, r * 9 + 60);
         } else if (selectedObject.type === "planet") {
           const planet = planetRefs[selectedObject.id];
-          if (planet) planet.getWorldPosition(worldPos);
+          if (planet) {
+            planet.getWorldPosition(worldPos);
+            hasTarget = worldPos.lengthSq() > 0;
+          }
           const pr = planetOrbits[selectedObject.id]?.planetRadius || 1;
           offset = new THREE.Vector3(0, pr * 6 + 8, pr * 16 + 16);
         }
+      }
 
-        if (worldPos.lengthSq() > 0) {
-          targetLookAt.current.copy(worldPos);
-          targetPosition.current.copy(worldPos).add(offset);
+      const lookAt = hasTarget ? worldPos : new THREE.Vector3(0, 0, 0);
+
+      if (focusing.current) {
+        // Brief fly-to: drive both camera and pivot toward the framed target.
+        targetLookAt.current.copy(lookAt);
+        targetPosition.current.copy(hasTarget ? worldPos.clone().add(offset) : HOME_POS);
+        state.camera.position.lerp(targetPosition.current, delta * 3);
+        if (orbit) orbit.target.lerp(targetLookAt.current, delta * 3);
+        focusElapsed.current += delta;
+        if (focusElapsed.current > 1.3) {
+          focusing.current = false;
+          if (orbit) orbit.enabled = true;
         }
-      } else {
-        targetPosition.current.copy(HOME_POS);
-        targetLookAt.current.set(0, 0, 0);
+      } else if (hasTarget && orbit) {
+        // Keep the selected object centered, but let the user zoom/orbit freely.
+        orbit.target.lerp(lookAt, delta * 2);
       }
-
-      state.camera.position.lerp(targetPosition.current, delta * 2.5);
-      if (orbitRef.current) {
-        orbitRef.current.target.lerp(targetLookAt.current, delta * 2.5);
-      }
+      if (orbit) orbit.update();
     } else if (cameraMode === "spaceship") {
       const speed = 600.0 * delta;
 

@@ -73,8 +73,8 @@ galaxyData.domains.forEach((d, i) => {
 
   const papers = [...(papersByDomain[d.id] || [])].sort((a, b) => b.relevance - a.relevance);
   const n = papers.length;
-  const innerR = sunRadius + 12;
-  const targetOuter = innerR + 40 + 9 * Math.sqrt(Math.max(1, n));
+  const innerR = sunRadius + 14;
+  const targetOuter = innerR + 50 + 13 * Math.sqrt(Math.max(1, n));
 
   papers.forEach((p, k) => {
     const prng = mulberry32(hashString(p.id));
@@ -85,7 +85,7 @@ galaxyData.domains.forEach((d, i) => {
     const node = prng() * Math.PI * 2;
     const initialAngle = prng() * Math.PI * 2;
     const speed = (0.4 + prng() * 0.5) / Math.sqrt(a);
-    const planetRadius = Math.min(6, Math.max(0.7, Math.sqrt(p.citations) * 0.12 + 0.7));
+    const planetRadius = Math.min(8, Math.max(1.2, Math.sqrt(p.citations) * 0.16 + 1.2));
     const texIndex = Math.abs(hashString(p.id)) % PLANET_TEXTURES.length;
     planetOrbits[p.id] = { a, e, incl, node, initialAngle, speed, planetRadius, texIndex };
   });
@@ -282,7 +282,7 @@ function Sun({
           toneMapped={false}
         />
       </mesh>
-      <pointLight color={color} intensity={dimmed ? 0.4 : 4} distance={radius * 60} decay={1.5} />
+      <pointLight color={color} intensity={dimmed ? 0.4 : 5.5} distance={radius * 90} decay={1.4} />
       <mesh scale={1.22}>
         <sphereGeometry args={[radius, 32, 32]} />
         <meshBasicMaterial
@@ -360,7 +360,7 @@ const PlanetSystem = React.memo(function PlanetSystem({
           roughness={0.9}
           metalness={0.0}
           emissive={color}
-          emissiveIntensity={highlighted ? 0.5 : 0}
+          emissiveIntensity={highlighted ? 0.5 : 0.1}
           transparent={dimmed}
           opacity={dimmed ? 0.12 : 1}
         />

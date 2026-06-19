@@ -86,6 +86,8 @@ async function main() {
   const sorted = [...groups.values()].sort((a, b) => b.papers.length - a.papers.length);
   const MAX_SUNS = 11;
   const MIN_PAPERS = 4;
+  const SPLIT_THRESHOLD = 90;
+  const MIN_TOPIC_PAPERS = 12;
   const kept = [];
   const overflow = [];
   for (const g of sorted) {
@@ -98,7 +100,30 @@ async function main() {
     if (merged.papers.length) kept.push(merged);
   }
 
-  const domains = kept.map((g, i) => {
+  // A single subfield (e.g. "Molecular Biology") can dwarf the whole galaxy.
+  // Break any oversized subfield into per-topic suns so the domains stay balanced.
+  const finalGroups = [];
+  for (const g of kept) {
+    if (g.papers.length <= SPLIT_THRESHOLD || g.name === "Cross-Disciplinary") {
+      finalGroups.push(g);
+      continue;
+    }
+    const byTopic = new Map();
+    for (const p of g.papers) {
+      const t = p.topic || g.name;
+      if (!byTopic.has(t)) byTopic.set(t, []);
+      byTopic.get(t).push(p);
+    }
+    const remainder = [];
+    for (const [topic, ps] of [...byTopic.entries()].sort((a, b) => b[1].length - a[1].length)) {
+      if (ps.length >= MIN_TOPIC_PAPERS) finalGroups.push({ name: topic, field: g.field, papers: ps });
+      else remainder.push(...ps);
+    }
+    if (remainder.length) finalGroups.push({ name: g.name, field: g.field, papers: remainder });
+  }
+  finalGroups.sort((a, b) => b.papers.length - a.papers.length);
+
+  const domains = finalGroups.map((g, i) => {
     const totalCitations = g.papers.reduce((s, p) => s + p.citations, 0);
     return {
       id: `sun-${i}`,
@@ -111,7 +136,7 @@ async function main() {
 
   // assign domainId back to papers
   const out = [];
-  kept.forEach((g, i) => {
+  finalGroups.forEach((g, i) => {
     for (const p of g.papers) {
       out.push({ ...p, domainId: `sun-${i}` });
     }
