@@ -34,12 +34,12 @@ export function IntroSequence() {
         </motion.div>
 
         <motion.h1
-          className="text-7xl md:text-9xl font-display font-extrabold tracking-tight mb-4 text-ink"
+          className="text-7xl md:text-9xl font-title font-medium italic tracking-tight mb-4 text-ink"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 2, ease: "easeOut" }}
         >
-          GALAXY
+          Galaxy
         </motion.h1>
 
         <motion.div
@@ -49,10 +49,10 @@ export function IntroSequence() {
           className="space-y-2"
         >
           <p className="text-lg md:text-2xl font-display font-semibold text-accent uppercase tracking-[0.3em]">
-            The Universe of Ideas
+            A Legacy of Innovation
           </p>
           <p className="text-base md:text-xl font-mono text-ink-dim tracking-widest">
-            {galaxyData.author.name}
+            by {galaxyData.author.name}
           </p>
         </motion.div>
 
@@ -74,7 +74,7 @@ export function IntroSequence() {
           onClick={() => setIntroFinished(true)}
           className="glass-panel glass-panel-interactive mt-16 px-8 py-3 bg-accent text-accent-foreground font-display text-sm uppercase tracking-[0.2em]"
         >
-          Enter the Universe
+          Enter the Galaxy
         </motion.button>
       </div>
     </motion.div>

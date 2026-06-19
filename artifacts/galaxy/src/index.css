@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
 
 @import "tailwindcss";
 @import "tw-animate-css";
@@ -32,7 +32,7 @@
 
   --font-sans: 'Outfit', sans-serif;
   --font-display: 'Archivo', sans-serif;
-  --font-title: 'Archivo', sans-serif;
+  --font-title: 'Fraunces', serif;
   --font-mono: 'Space Mono', monospace;
 
   --radius: var(--radius);
