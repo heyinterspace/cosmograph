@@ -31,6 +31,22 @@ export function Overlay() {
                   {hoveredObject.type === "sun" ? "Domain" : "Paper"}
                 </span>
                 <span className="text-sm text-ink line-clamp-1">{hoveredObject.name}</span>
+                {hoveredObject.type === "sun" &&
+                  (() => {
+                    const d = galaxyData.domains.find((x) => x.id === hoveredObject.id);
+                    if (!d) return null;
+                    return (
+                      <div className="mt-1.5 flex items-center justify-center gap-4 font-mono text-[11px] text-ink-dim">
+                        <span>
+                          <span className="text-ink">{d.paperCount}</span> planets
+                        </span>
+                        <span className="text-ink-dim/40">·</span>
+                        <span>
+                          <span className="text-ink">{d.totalCitations.toLocaleString()}</span> citations
+                        </span>
+                      </div>
+                    );
+                  })()}
               </motion.div>
             )}
           </AnimatePresence>
