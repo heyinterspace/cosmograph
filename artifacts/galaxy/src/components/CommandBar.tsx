@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Orbit, Compass, Axis3d, Sun, Globe2, X, Filter } from "lucide-react";
+import { Search, Orbit, Compass, Sun, Globe2, X, Filter } from "lucide-react";
 import { useAppState } from "@/lib/store";
 import {
   galaxyData,
@@ -42,8 +42,6 @@ export function CommandBar() {
   const {
     cameraMode,
     setCameraMode,
-    galaxyTilt,
-    setGalaxyTilt,
     setSelectedObject,
     setSearchActive,
     filters,
@@ -51,7 +49,6 @@ export function CommandBar() {
     resetFilters,
   } = useAppState();
   const [query, setQuery] = useState("");
-  const [showTilt, setShowTilt] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const { stats } = galaxyData;
@@ -94,31 +91,6 @@ export function CommandBar() {
 
   return (
     <div className="absolute bottom-11 left-1/2 -translate-x-1/2 w-[min(1080px,calc(100vw-2.5rem))] pointer-events-auto">
-      <AnimatePresence>
-        {showTilt && cameraMode === "god" && (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 8 }}
-            className="glass-panel mb-3 p-4"
-          >
-            <div className="flex items-center justify-between mb-2">
-              <span className="font-mono text-[11px] uppercase tracking-widest text-ink-dim">Galactic Tilt</span>
-              <span className="font-mono text-[11px] text-ink">{Math.round((galaxyTilt * 180) / Math.PI)}°</span>
-            </div>
-            <input
-              type="range"
-              min={-Math.PI / 2}
-              max={Math.PI / 2}
-              step={0.01}
-              value={galaxyTilt}
-              onChange={(e) => setGalaxyTilt(parseFloat(e.target.value))}
-              className="w-full h-1.5 bg-white/15 appearance-none cursor-pointer accent-accent"
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       <AnimatePresence>
         {showFilters && (
           <motion.div
@@ -289,16 +261,6 @@ export function CommandBar() {
             {filtersActive && !showFilters && (
               <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-accent ring-2 ring-black" />
             )}
-          </button>
-          <button
-            onClick={() => setShowTilt((s) => !s)}
-            disabled={cameraMode !== "god"}
-            title="Galactic tilt"
-            className={`flex items-center justify-center h-11 w-11 md:h-9 md:w-9 border-2 border-edge transition-all disabled:opacity-30 ${
-              showTilt && cameraMode === "god" ? "bg-accent text-accent-foreground" : "bg-white/5 text-ink hover:bg-white/10"
-            }`}
-          >
-            <Axis3d size={15} />
           </button>
           <ModeButton
             active={cameraMode === "god"}

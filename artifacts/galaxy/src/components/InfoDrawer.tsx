@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { X, Sun, Globe2, Moon, Orbit, Network } from "lucide-react";
+import { X, Sun, Globe2, Moon, Orbit, Network, Compass } from "lucide-react";
 import { useAppState } from "@/lib/store";
 import { galaxyData } from "@/data/galaxy";
 import { SITE } from "@/config/site";
@@ -132,6 +132,77 @@ export function InfoDrawer() {
                   </div>
                 ))}
               </div>
+            </div>
+
+            <div className="mt-8 border-t-2 border-edge pt-6">
+              <span className="font-mono text-[10px] uppercase tracking-widest text-accent">
+                Getting around
+              </span>
+              <h3 className="mt-1 mb-4 text-lg font-title font-bold tracking-tight text-ink">
+                Two ways to explore
+              </h3>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="border-2 border-edge bg-white/5 p-4">
+                  <div className="flex items-center gap-2.5">
+                    <div className="grid h-8 w-8 shrink-0 place-items-center border-2 border-edge bg-white/5 text-accent">
+                      <Orbit size={15} />
+                    </div>
+                    <span className="font-display text-sm font-semibold uppercase tracking-wider text-ink">
+                      Orbit
+                    </span>
+                  </div>
+                  <p className="mt-2.5 text-[13px] leading-relaxed text-ink-dim">
+                    Float above the galaxy and study it from the outside.
+                  </p>
+                  <ul className="mt-3 space-y-1.5 font-mono text-[11px] text-ink-dim">
+                    <li>
+                      <span className="text-ink">Drag (left)</span> · pan across
+                    </li>
+                    <li>
+                      <span className="text-ink">Drag (right)</span> · rotate & tilt the view
+                    </li>
+                    <li>
+                      <span className="text-ink">Scroll</span> · zoom in & out
+                    </li>
+                    <li>
+                      <span className="text-ink">Click</span> a sun or planet for details
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="border-2 border-edge bg-white/5 p-4">
+                  <div className="flex items-center gap-2.5">
+                    <div className="grid h-8 w-8 shrink-0 place-items-center border-2 border-edge bg-white/5 text-accent">
+                      <Compass size={15} />
+                    </div>
+                    <span className="font-display text-sm font-semibold uppercase tracking-wider text-ink">
+                      Fly
+                    </span>
+                  </div>
+                  <p className="mt-2.5 text-[13px] leading-relaxed text-ink-dim">
+                    Drop into the disk and pilot a ship through the stars.
+                  </p>
+                  <ul className="mt-3 space-y-1.5 font-mono text-[11px] text-ink-dim">
+                    <li>
+                      <span className="text-ink">W A S D</span> · fly through space
+                    </li>
+                    <li>
+                      <span className="text-ink">Drag</span> or <span className="text-ink">← ↑ ↓ →</span> · look around
+                    </li>
+                    <li>
+                      <span className="text-ink">Q</span> / <span className="text-ink">E</span> · roll
+                    </li>
+                    <li>
+                      <span className="text-ink">Space</span> / <span className="text-ink">Shift</span> · rise & descend
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <p className="mt-3 font-mono text-[10px] leading-relaxed text-ink-dim/70">
+                On touch: drag with one finger to pan, pinch to zoom & rotate.
+              </p>
             </div>
 
             <p className="mt-8 border-t-2 border-edge pt-4 font-mono text-[11px] leading-relaxed text-ink-dim">
