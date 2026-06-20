@@ -68,8 +68,8 @@ const BEATS: Beat[] = [
     start: 0.77,
     end: 0.9,
     kicker: "Roughly",
-    value: `~${Math.round(s.estimatedWords / 1_000_000)}M`,
-    caption: "words written across a career",
+    value: Math.round(s.estimatedWords / 90_000).toLocaleString(),
+    caption: "novels' worth of writing across a career",
   },
 ];
 
