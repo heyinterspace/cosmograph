@@ -93,7 +93,7 @@ export function CommandBar() {
   };
 
   return (
-    <div className="absolute bottom-5 left-1/2 -translate-x-1/2 w-[min(1080px,calc(100vw-2.5rem))] pointer-events-auto">
+    <div className="absolute bottom-11 left-1/2 -translate-x-1/2 w-[min(1080px,calc(100vw-2.5rem))] pointer-events-auto">
       <AnimatePresence>
         {showTilt && cameraMode === "god" && (
           <motion.div

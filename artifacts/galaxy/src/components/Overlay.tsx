@@ -6,6 +6,7 @@ import { CommandBar } from "./CommandBar";
 import { FilteredPapersPanel } from "./FilteredPapersPanel";
 import { TourOverlay } from "./TourOverlay";
 import { FlyHud } from "./FlyHud";
+import { Footer } from "./Footer";
 import { galaxyData } from "@/data/galaxy";
 import { Compass, Rewind, Info, X, Sun, Globe2, Moon, Orbit, Network } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -71,6 +72,7 @@ export function Overlay() {
 
               <CommandBar />
               <FlyHud />
+              <Footer />
             </>
           )}
           <TourOverlay />
