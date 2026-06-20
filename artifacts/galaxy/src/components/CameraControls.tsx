@@ -6,7 +6,10 @@ import { useAppState } from "@/lib/store";
 import { planetRefs, sunRefs, planetOrbits, sunRadii } from "./GalaxySystem";
 import { tourStops } from "@/lib/tour";
 
-const HOME_POS = new THREE.Vector3(0, 1100, 1700);
+// Resting overview after the intro flight (and god-mode home). Kept close and
+// low to the galactic plane so the spiral arms sweep across and past the frame
+// edges — the corpus should feel vast and sprawling, not a small distant disk.
+const HOME_POS = new THREE.Vector3(0, 430, 1120);
 export const INTRO_START = new THREE.Vector3(0, 2600, 13000);
 
 function easeInOutCubic(t: number): number {
