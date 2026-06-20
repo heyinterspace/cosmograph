@@ -314,17 +314,8 @@ export function ScrollIntro() {
             exit={{ opacity: 0 }}
             transition={{ duration: 1 }}
           >
-            <p className="mb-3 font-display text-xs uppercase tracking-[0.35em] text-accent md:text-sm">
+            <p className="mb-12 font-display text-xs uppercase tracking-[0.35em] text-accent md:text-sm">
               You have arrived
-            </p>
-            <h2 className="mb-3 font-title text-6xl font-bold tracking-tight text-ink md:text-8xl">
-              Galactic
-            </h2>
-            <p className="font-display text-base font-semibold uppercase tracking-[0.3em] text-accent md:text-xl">
-              A Journey of Scientific Exploration
-            </p>
-            <p className="mb-12 mt-2 font-mono text-base uppercase tracking-[0.25em] text-ink-dim md:text-lg">
-              by {galaxyData.author.name}
             </p>
             <div className="pointer-events-auto flex flex-col items-center gap-4 sm:flex-row">
               <button
@@ -332,13 +323,13 @@ export function ScrollIntro() {
                 style={{ background: "var(--accent)", color: "var(--accent-ink)" }}
                 className="glass-panel glass-panel-interactive px-9 py-3.5 font-display text-sm font-semibold uppercase tracking-[0.2em]"
               >
-                Explore Freely
+                Explore
               </button>
               <button
                 onClick={finishTour}
                 className="glass-panel glass-panel-interactive px-9 py-3.5 font-display text-sm uppercase tracking-[0.2em] text-ink"
               >
-                Guided Tour
+                Tour
               </button>
             </div>
           </motion.div>
