@@ -1,176 +1,219 @@
-import { useMemo, RefObject } from "react";
+import { useMemo, RefObject, ReactNode } from "react";
+
+const ACCENT = "163,136,238";
 
 interface WarpLine {
   angle: number;
   length: number;
   opacity: number;
   thickness: number;
+  hue: string;
 }
 
 export function Cockpit({ warpRef }: { warpRef: RefObject<HTMLDivElement | null> }) {
-  const lines = useMemo<WarpLine[]>(() => {
-    return Array.from({ length: 64 }).map((_, i) => ({
-      angle: (i / 64) * 360 + (Math.random() - 0.5) * 5,
-      length: 40 + Math.random() * 50,
-      opacity: 0.25 + Math.random() * 0.6,
-      thickness: Math.random() > 0.8 ? 2 : 1,
-    }));
-  }, []);
+  const lines = useMemo<WarpLine[]>(
+    () =>
+      Array.from({ length: 60 }).map((_, i) => ({
+        angle: (i / 60) * 360 + (Math.random() - 0.5) * 6,
+        length: 45 + Math.random() * 55,
+        opacity: 0.18 + Math.random() * 0.5,
+        thickness: Math.random() > 0.85 ? 2 : 1,
+        hue: Math.random() > 0.72 ? ACCENT : "232,236,255",
+      })),
+    [],
+  );
 
   return (
-    <div className="absolute inset-0 z-40 overflow-hidden pointer-events-none">
-      {/* Warp / star streaks emanating from the vanishing point */}
+    <div className="absolute inset-0 z-40 overflow-hidden pointer-events-none font-mono">
+      {/* Warp streaks emanating from the vanishing point */}
       <div
         ref={warpRef}
         className="absolute inset-0 opacity-0"
-        style={{ transformOrigin: "50% 46%", willChange: "opacity, transform" }}
+        style={{ transformOrigin: "50% 44%", willChange: "opacity, transform" }}
       >
         {lines.map((l, i) => (
           <div
             key={i}
-            className="absolute left-1/2 top-[46%] origin-left"
+            className="absolute left-1/2 top-[44%] origin-left"
             style={{
               height: `${l.thickness}px`,
               width: `${l.length}vmax`,
               transform: `rotate(${l.angle}deg)`,
               opacity: l.opacity,
-              background:
-                "linear-gradient(90deg, rgba(190,225,255,0) 0%, rgba(190,225,255,0) 45%, rgba(190,225,255,0.5) 80%, rgba(225,240,255,0.95) 100%)",
+              background: `linear-gradient(90deg, rgba(${l.hue},0) 0%, rgba(${l.hue},0) 58%, rgba(${l.hue},0.4) 84%, rgba(${l.hue},0.95) 100%)`,
             }}
           />
         ))}
       </div>
 
-      {/* Window vignette — frames the view like looking through glass */}
+      {/* Cinematic vignette to seat the eye in the cockpit */}
       <div
         className="absolute inset-0"
-        style={{ boxShadow: "inset 0 0 260px 70px rgba(2,3,12,0.92)" }}
+        style={{ boxShadow: "inset 0 0 220px 70px rgba(8,8,14,0.92)" }}
       />
       <div
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(130% 100% at 50% 38%, transparent 52%, rgba(2,3,12,0.45) 78%, rgba(2,3,12,0.85) 100%)",
+            "radial-gradient(140% 108% at 50% 42%, transparent 48%, rgba(8,8,14,0.42) 75%, rgba(8,8,14,0.8) 100%)",
         }}
       />
-
-      {/* Faint glass reflection across the canopy */}
+      {/* Faint accent wash along the top of the canopy */}
       <div
-        className="absolute inset-x-0 top-0 h-1/2"
+        className="absolute inset-x-0 top-0 h-1/3"
         style={{
-          background:
-            "linear-gradient(160deg, rgba(120,180,220,0.06) 0%, transparent 35%)",
+          background: `linear-gradient(180deg, rgba(${ACCENT},0.09) 0%, transparent 70%)`,
         }}
       />
 
-      {/* HUD corner brackets */}
-      <HudCorner className="top-6 left-6" />
-      <HudCorner className="top-6 right-6 scale-x-[-1]" />
-      <HudCorner className="bottom-[30vh] left-6 scale-y-[-1]" />
-      <HudCorner className="bottom-[30vh] right-6 -scale-100" />
+      {/* Top HUD bar */}
+      <div
+        className="absolute inset-x-0 top-0 flex items-center justify-between px-6 py-3 text-[10px] uppercase tracking-[0.3em] text-ink-dim"
+        style={{ borderBottom: `2px solid rgba(${ACCENT},0.5)` }}
+      >
+        <span>Galactic · Flight Systems</span>
+        <span className="hidden text-accent/80 sm:block">Ad Astra</span>
+        <span>Nav · Online</span>
+      </div>
 
-      {/* Dashboard silhouette */}
-      <div className="absolute inset-x-0 bottom-0 h-[32vh]">
-        <svg
-          viewBox="0 0 1440 420"
-          preserveAspectRatio="none"
-          className="absolute inset-0 h-full w-full"
-        >
-          <defs>
-            <linearGradient id="dash" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#0a0e1a" stopOpacity="0.65" />
-              <stop offset="22%" stopColor="#0a0e1a" stopOpacity="0.96" />
-              <stop offset="100%" stopColor="#04060e" stopOpacity="1" />
-            </linearGradient>
-            <linearGradient id="rim" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="rgba(120,200,225,0.55)" />
-              <stop offset="100%" stopColor="rgba(120,200,225,0)" />
-            </linearGradient>
-          </defs>
+      {/* Corner brackets framing the viewport */}
+      <Bracket className="left-5 top-16" edges="lt" />
+      <Bracket className="right-5 top-16" edges="rt" />
+      <Bracket className="left-5 bottom-[28vh]" edges="lb" />
+      <Bracket className="right-5 bottom-[28vh]" edges="rb" />
 
-          {/* Concave dashboard top edge — opens up the view in the centre */}
-          <path
-            d="M0,420 L0,180 C260,150 480,110 720,108 C960,110 1180,150 1440,180 L1440,420 Z"
-            fill="url(#dash)"
-          />
-          {/* Glowing rim line along the dashboard edge */}
-          <path
-            d="M0,180 C260,150 480,110 720,108 C960,110 1180,150 1440,180"
-            fill="none"
-            stroke="url(#rim)"
-            strokeWidth="2"
-          />
-          <path
-            d="M0,180 C260,150 480,110 720,108 C960,110 1180,150 1440,180"
-            fill="none"
-            stroke="rgba(150,220,240,0.5)"
-            strokeWidth="1"
-          />
+      {/* Centre target reticle — square, per Structured Liquidity */}
+      <div className="absolute left-1/2 top-[44%] h-16 w-16 -translate-x-1/2 -translate-y-1/2">
+        <span
+          className="absolute left-0 top-0 h-3 w-3 border-l-2 border-t-2"
+          style={{ borderColor: `rgba(${ACCENT},0.6)` }}
+        />
+        <span
+          className="absolute right-0 top-0 h-3 w-3 border-r-2 border-t-2"
+          style={{ borderColor: `rgba(${ACCENT},0.6)` }}
+        />
+        <span
+          className="absolute bottom-0 left-0 h-3 w-3 border-b-2 border-l-2"
+          style={{ borderColor: `rgba(${ACCENT},0.6)` }}
+        />
+        <span
+          className="absolute bottom-0 right-0 h-3 w-3 border-b-2 border-r-2"
+          style={{ borderColor: `rgba(${ACCENT},0.6)` }}
+        />
+        <span
+          className="absolute left-1/2 top-1/2 h-1 w-1 -translate-x-1/2 -translate-y-1/2"
+          style={{ background: `rgba(${ACCENT},0.9)` }}
+        />
+      </div>
 
-          {/* Left gauge cluster */}
-          <g
-            stroke="rgba(140,210,235,0.45)"
-            fill="none"
-            strokeWidth="2"
-            strokeLinecap="round"
-          >
-            <path d="M150,300 A60,60 0 0 1 270,300" />
-            <path d="M168,300 A42,42 0 0 1 252,300" strokeOpacity="0.4" />
-            <line x1="210" y1="300" x2="180" y2="262" strokeOpacity="0.8" />
-          </g>
-          {/* Right gauge cluster */}
-          <g
-            stroke="rgba(140,210,235,0.45)"
-            fill="none"
-            strokeWidth="2"
-            strokeLinecap="round"
-          >
-            <path d="M1170,300 A60,60 0 0 1 1290,300" />
-            <path d="M1188,300 A42,42 0 0 1 1272,300" strokeOpacity="0.4" />
-            <line x1="1230" y1="300" x2="1262" y2="266" strokeOpacity="0.8" />
-          </g>
+      {/* Bottom console */}
+      <div className="absolute inset-x-0 bottom-0 h-[26vh]">
+        {/* Panel fill */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(12,13,22,0) 0%, rgba(12,13,22,0.94) 32%, rgba(6,7,13,1) 100%)",
+          }}
+        />
+        {/* Top edge: hard black rule + accent hairline */}
+        <div className="absolute inset-x-0 top-[30%] h-[2px] bg-black/80" />
+        <div
+          className="absolute inset-x-0 top-[30%] h-[2px]"
+          style={{
+            background: `linear-gradient(90deg, transparent, rgba(${ACCENT},0.7) 50%, transparent)`,
+          }}
+        />
 
-          {/* Centre indicator ticks */}
-          <g fill="rgba(150,220,240,0.5)">
-            {Array.from({ length: 9 }).map((_, i) => (
-              <rect
-                key={i}
-                x={660 + i * 15}
-                y={250 + (i === 4 ? -6 : 0)}
-                width="3"
-                height={i === 4 ? 18 : 10}
-                rx="1.5"
+        {/* Instrument readouts */}
+        <div className="absolute inset-x-0 bottom-[22%] flex items-end justify-between px-[7%]">
+          <Readout label="Velocity">
+            <div className="flex items-center gap-[3px]">
+              {Array.from({ length: 14 }).map((_, i) => (
+                <span
+                  key={i}
+                  className="h-3.5 w-[3px]"
+                  style={{ background: `rgba(${ACCENT},${i < 9 ? 0.9 : 0.18})` }}
+                />
+              ))}
+            </div>
+          </Readout>
+
+          {/* Heading tape */}
+          <div className="hidden flex-col items-center gap-2 md:flex">
+            <div className="flex items-end gap-[5px]">
+              {Array.from({ length: 13 }).map((_, i) => (
+                <span
+                  key={i}
+                  className="w-px"
+                  style={{
+                    height: i === 6 ? 16 : 8,
+                    background: `rgba(${ACCENT},${i === 6 ? 0.95 : 0.45})`,
+                  }}
+                />
+              ))}
+            </div>
+            <span className="text-[9px] uppercase tracking-[0.35em] text-accent/70">
+              Heading 000
+            </span>
+          </div>
+
+          <Readout label="Drive" align="right">
+            <div className="flex items-center gap-2">
+              <span
+                className="h-2 w-2"
+                style={{
+                  background: `rgba(${ACCENT},0.95)`,
+                  boxShadow: `0 0 8px 1px rgba(${ACCENT},0.6)`,
+                }}
               />
-            ))}
-          </g>
-        </svg>
-
-        {/* Blinking status dots */}
-        <div className="absolute left-[14%] bottom-[18%] flex gap-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-300/80 shadow-[0_0_8px_2px_rgba(110,231,183,0.6)]" />
-          <span className="h-1.5 w-1.5 rounded-full bg-amber-300/70" />
-        </div>
-        <div className="absolute right-[14%] bottom-[18%] font-mono text-[9px] uppercase tracking-[0.3em] text-accent/60">
-          Nav · Online
+              <span className="text-[10px] uppercase tracking-[0.3em] text-ink-dim">
+                Engaged
+              </span>
+            </div>
+          </Readout>
         </div>
       </div>
     </div>
   );
 }
 
-function HudCorner({ className = "" }: { className?: string }) {
+function Readout({
+  label,
+  align = "left",
+  children,
+}: {
+  label: string;
+  align?: "left" | "right";
+  children: ReactNode;
+}) {
   return (
-    <svg
-      className={`absolute h-10 w-10 text-accent/40 ${className}`}
-      viewBox="0 0 40 40"
-      fill="none"
+    <div
+      className={`flex flex-col gap-2 ${align === "right" ? "items-end" : "items-start"}`}
     >
-      <path
-        d="M2,14 L2,2 L14,2"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-    </svg>
+      <span className="text-[9px] uppercase tracking-[0.35em] text-ink-dim">{label}</span>
+      {children}
+    </div>
+  );
+}
+
+function Bracket({
+  className = "",
+  edges,
+}: {
+  className?: string;
+  edges: "lt" | "rt" | "lb" | "rb";
+}) {
+  const map: Record<string, string> = {
+    lt: "border-l-2 border-t-2",
+    rt: "border-r-2 border-t-2",
+    lb: "border-b-2 border-l-2",
+    rb: "border-b-2 border-r-2",
+  };
+  return (
+    <span
+      className={`absolute h-7 w-7 ${map[edges]} ${className}`}
+      style={{ borderColor: `rgba(${ACCENT},0.45)` }}
+    />
   );
 }
