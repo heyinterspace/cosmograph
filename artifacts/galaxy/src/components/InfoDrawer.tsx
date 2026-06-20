@@ -1,13 +1,45 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { X } from "lucide-react";
+import { X, Github, Star, Share2, Check } from "lucide-react";
 import { useAppState } from "@/lib/store";
 import { galaxyData } from "@/data/galaxy";
 import { SITE } from "@/config/site";
 import { LEGEND, NAV_MODES } from "@/lib/legend";
+import { useGithubStars, formatStars } from "@/lib/useGithubStars";
 
 export function InfoDrawer() {
-  const { infoOpen, setInfoOpen } = useAppState();
+  const { infoOpen, setInfoOpen, setChangelogOpen } = useAppState();
+  const { stars, url } = useGithubStars();
+  const [copied, setCopied] = useState(false);
+
+  const shareUrl =
+    typeof window !== "undefined" ? window.location.href : `https://${SITE.domain}`;
+
+  const handleShare = async () => {
+    const data = {
+      title: "Galactic",
+      text: `Explore ${galaxyData.author.name}'s life in science as an interactive galaxy.`,
+      url: shareUrl,
+    };
+    try {
+      if (typeof navigator !== "undefined" && navigator.share) {
+        await navigator.share(data);
+        return;
+      }
+      if (typeof navigator !== "undefined" && navigator.clipboard) {
+        await navigator.clipboard.writeText(shareUrl);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+    } catch {
+      /* user cancelled share or clipboard blocked — no-op */
+    }
+  };
+
+  const openChangelog = () => {
+    setInfoOpen(false);
+    setChangelogOpen(true);
+  };
 
   useEffect(() => {
     if (!infoOpen) return;
@@ -42,14 +74,42 @@ export function InfoDrawer() {
             className="custom-scrollbar absolute inset-x-0 bottom-0 mx-auto max-h-[85vh] w-full max-w-2xl overflow-y-auto border-t-2 border-edge bg-bg/95 p-7 backdrop-blur-xl"
           >
             <div className="mx-auto mb-5 h-1.5 w-12 rounded-full bg-ink-dim/30" />
-            <button
-              onClick={() => setInfoOpen(false)}
-              aria-label="Close"
-              autoFocus
-              className="absolute top-4 right-4 text-ink-dim transition-colors hover:text-ink"
-            >
-              <X size={18} />
-            </button>
+            <div className="absolute top-4 right-4 flex items-center gap-2">
+              <button
+                onClick={handleShare}
+                aria-label="Share"
+                title="Share Galactic"
+                className="flex items-center gap-1.5 border-2 border-edge bg-white/5 px-3 py-1.5 font-display text-[11px] uppercase tracking-wider text-ink transition-colors hover:bg-white/10"
+              >
+                {copied ? <Check size={13} className="text-accent" /> : <Share2 size={13} />}
+                {copied ? "Copied" : "Share"}
+              </button>
+              <a
+                href={url ?? SITE.github.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="View source on GitHub"
+                title="View source on GitHub"
+                className="flex items-center gap-1.5 border-2 border-edge bg-white/5 px-3 py-1.5 font-display text-[11px] uppercase tracking-wider text-ink transition-colors hover:bg-white/10"
+              >
+                <Github size={13} />
+                GitHub
+                {stars !== null && (
+                  <span className="inline-flex items-center gap-0.5 text-accent">
+                    <Star size={10} className="fill-current" />
+                    {formatStars(stars)}
+                  </span>
+                )}
+              </a>
+              <button
+                onClick={() => setInfoOpen(false)}
+                aria-label="Close"
+                autoFocus
+                className="ml-1 text-ink-dim transition-colors hover:text-ink"
+              >
+                <X size={18} />
+              </button>
+            </div>
 
             <span className="font-mono text-[10px] uppercase tracking-widest text-accent">
               About this Venture
@@ -191,7 +251,15 @@ export function InfoDrawer() {
               vanishes the moment you leave.
             </p>
             <p className="mt-4 font-mono text-[10px] leading-relaxed text-ink-dim/70">
-              v{SITE.version} · <span className="text-ink-dim">{SITE.domain}</span> is an{" "}
+              © 2026{" "}
+              <button
+                onClick={openChangelog}
+                title="View the flight log"
+                className="text-accent underline-offset-2 transition-colors hover:underline"
+              >
+                v{SITE.version}
+              </button>{" "}
+              · <span className="text-ink-dim">{SITE.domain}</span> is an{" "}
               <a
                 href={SITE.org.url}
                 target="_blank"
@@ -199,6 +267,15 @@ export function InfoDrawer() {
                 className="text-accent underline-offset-2 hover:underline"
               >
                 {SITE.org.name}
+              </a>
+              . Built at the speed of thought with{" "}
+              <a
+                href={SITE.replitUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-accent underline-offset-2 hover:underline"
+              >
+                Replit
               </a>
               .
             </p>
