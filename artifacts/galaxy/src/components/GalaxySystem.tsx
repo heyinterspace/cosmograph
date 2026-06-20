@@ -11,7 +11,7 @@ const TEX = (f: string) => `${import.meta.env.BASE_URL}textures/${f}`;
 const PLANET_TEXTURES = [
   "mercurymap.jpg",
   "venusmap.jpg",
-  "earthmap1k.jpg",
+  "earth_atmos_2048.jpg",
   "marsmap1k.jpg",
   "jupitermap.jpg",
   "saturnmap.jpg",
@@ -19,7 +19,12 @@ const PLANET_TEXTURES = [
   "neptunemap.jpg",
   "plutomap1k.jpg",
 ];
+const EARTH_IDX = 2;
 const SATURN_IDX = 5;
+// Rocky bodies get fake relief by reusing the colour map as a bump map.
+const ROCKY = new Set([0, 1, 3, 8]);
+// Gas giants stay smooth (atmospheric banding, no terrain).
+const GAS = new Set([4, 5, 6, 7]);
 
 // deterministic rng
 const mulberry32 = (a: number) => () => {
@@ -32,6 +37,30 @@ function hashString(str: string) {
   let hash = 0;
   for (let i = 0; i < str.length; i++) hash = (Math.imul(31, hash) + str.charCodeAt(i)) | 0;
   return hash;
+}
+
+// Soft radial glow sprite for the stellar halo (canvas, runs in-browser).
+let _glowTex: THREE.Texture | null = null;
+function glowTexture(): THREE.Texture | null {
+  if (_glowTex) return _glowTex;
+  if (typeof document === "undefined") return null;
+  const size = 256;
+  const c = document.createElement("canvas");
+  c.width = c.height = size;
+  const ctx = c.getContext("2d");
+  if (!ctx) return null;
+  const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+  g.addColorStop(0, "rgba(255,255,255,1)");
+  g.addColorStop(0.18, "rgba(255,255,255,0.7)");
+  g.addColorStop(0.4, "rgba(255,244,214,0.28)");
+  g.addColorStop(0.75, "rgba(255,238,200,0.06)");
+  g.addColorStop(1, "rgba(255,238,200,0)");
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, size, size);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  _glowTex = t;
+  return t;
 }
 
 export interface OrbitParams {
@@ -109,23 +138,22 @@ export function GalaxySystem() {
     return s;
   }, [filters, filtersActive]);
 
-  const textures = useTexture([
-    ...PLANET_TEXTURES.map(TEX),
-    TEX("sunmap.jpg"),
-    TEX("moonmap1k.jpg"),
-    TEX("saturnringcolor.jpg"),
-  ]);
-
-  const planetTex = textures.slice(0, PLANET_TEXTURES.length);
-  const sunTex = textures[PLANET_TEXTURES.length];
-  const moonTex = textures[PLANET_TEXTURES.length + 1];
-  const ringTex = textures[PLANET_TEXTURES.length + 2];
+  const planetTex = useTexture(PLANET_TEXTURES.map(TEX));
+  const extra = useTexture({
+    earthNormal: TEX("earth_normal_2048.jpg"),
+    earthClouds: TEX("earth_clouds_1024.png"),
+    sun: TEX("sunmap.jpg"),
+    moon: TEX("moon_1024.jpg"),
+    ring: TEX("saturnringcolor.jpg"),
+  });
 
   useMemo(() => {
-    [...planetTex, sunTex, ringTex, moonTex].forEach((t) => {
+    // Colour maps must be sRGB; data maps (normals) must stay linear.
+    [...planetTex, extra.sun, extra.ring, extra.moon, extra.earthClouds].forEach((t) => {
       if (t) t.colorSpace = THREE.SRGBColorSpace;
     });
-  }, [planetTex, sunTex, ringTex, moonTex]);
+    if (extra.earthNormal) extra.earthNormal.colorSpace = THREE.NoColorSpace;
+  }, [planetTex, extra]);
 
   useFrame((state) => {
     const time = state.clock.elapsedTime;
@@ -150,10 +178,12 @@ export function GalaxySystem() {
           index={i}
           position={domainPositions[domain.id]}
           sunRadius={sunRadii[domain.id]}
-          sunTex={sunTex}
+          sunTex={extra.sun}
           planetTex={planetTex}
-          moonTex={moonTex}
-          ringTex={ringTex}
+          earthNormalTex={extra.earthNormal}
+          earthCloudsTex={extra.earthClouds}
+          moonTex={extra.moon}
+          ringTex={extra.ring}
           selectedObject={selectedObject}
           setHoveredObject={setHoveredObject}
           setSelectedObject={setSelectedObject}
@@ -173,6 +203,8 @@ interface SolarSystemProps {
   sunRadius: number;
   sunTex: THREE.Texture;
   planetTex: THREE.Texture[];
+  earthNormalTex: THREE.Texture;
+  earthCloudsTex: THREE.Texture;
   moonTex: THREE.Texture;
   ringTex: THREE.Texture;
   selectedObject: { type: string; id: string } | null;
@@ -190,6 +222,8 @@ const SolarSystem = React.memo(function SolarSystem({
   sunRadius,
   sunTex,
   planetTex,
+  earthNormalTex,
+  earthCloudsTex,
   moonTex,
   ringTex,
   selectedObject,
@@ -227,6 +261,8 @@ const SolarSystem = React.memo(function SolarSystem({
             coAuthors={p.coAuthors}
             color={color}
             planetTex={planetTex}
+            earthNormalTex={earthNormalTex}
+            earthCloudsTex={earthCloudsTex}
             moonTex={moonTex}
             ringTex={ringTex}
             isSelected={isSelected}
@@ -259,11 +295,24 @@ function Sun({
   onOut: () => void;
 }) {
   const ref = useRef<THREE.Mesh>(null);
-  useFrame((_, d) => {
+  const churn = useRef<THREE.Mesh>(null);
+  const coreMat = useRef<THREE.MeshStandardMaterial>(null);
+  const glow = useMemo(() => glowTexture(), []);
+  // Warm-shift the halo toward white-hot so the corona reads as plasma, not flat tint.
+  const halo = useMemo(() => color.clone().lerp(new THREE.Color("#fff6e6"), 0.45), [color]);
+  const baseIntensity = dimmed ? 0.15 : 1.6;
+
+  useFrame((s, d) => {
     if (ref.current) ref.current.rotation.y += d * 0.02;
+    if (churn.current) churn.current.rotation.y -= d * 0.035;
+    if (coreMat.current && !dimmed) {
+      coreMat.current.emissiveIntensity = baseIntensity + Math.sin(s.clock.elapsedTime * 1.3) * 0.18;
+    }
   });
+
   return (
     <group>
+      {/* Core */}
       <mesh
         ref={ref}
         onClick={(e) => { e.stopPropagation(); onSelect(); }}
@@ -272,29 +321,79 @@ function Sun({
       >
         <sphereGeometry args={[radius, 48, 48]} />
         <meshStandardMaterial
+          ref={coreMat}
           map={tex}
           emissiveMap={tex}
           emissive={color}
-          emissiveIntensity={dimmed ? 0.15 : 1.5}
+          emissiveIntensity={baseIntensity}
           color={color}
           transparent={dimmed}
           opacity={dimmed ? 0.25 : 1}
           toneMapped={false}
         />
       </mesh>
+
+      {/* Churning plasma shell — counter-rotates for a living surface */}
+      {!dimmed && (
+        <mesh ref={churn} scale={1.015}>
+          <sphereGeometry args={[radius, 32, 32]} />
+          <meshBasicMaterial
+            map={tex}
+            color={halo}
+            transparent
+            opacity={0.35}
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+            toneMapped={false}
+          />
+        </mesh>
+      )}
+
       <pointLight color={color} intensity={dimmed ? 0.4 : 5.5} distance={radius * 90} decay={1.4} />
-      <mesh scale={1.22}>
+
+      {/* Inner corona */}
+      <mesh scale={1.18}>
         <sphereGeometry args={[radius, 32, 32]} />
         <meshBasicMaterial
-          color={color}
+          color={halo}
           transparent
-          opacity={dimmed ? 0.03 : 0.16}
+          opacity={dimmed ? 0.03 : 0.22}
           side={THREE.BackSide}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
           toneMapped={false}
         />
       </mesh>
+      {/* Outer corona */}
+      {!dimmed && (
+        <mesh scale={1.55}>
+          <sphereGeometry args={[radius, 32, 32]} />
+          <meshBasicMaterial
+            color={color}
+            transparent
+            opacity={0.08}
+            side={THREE.BackSide}
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+            toneMapped={false}
+          />
+        </mesh>
+      )}
+
+      {/* Billboarded glow halo */}
+      {!dimmed && glow && (
+        <sprite scale={[radius * 7, radius * 7, 1]}>
+          <spriteMaterial
+            map={glow}
+            color={halo}
+            transparent
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+            opacity={0.9}
+            toneMapped={false}
+          />
+        </sprite>
+      )}
     </group>
   );
 }
@@ -305,6 +404,8 @@ interface PlanetSystemProps {
   coAuthors: string[];
   color: THREE.Color;
   planetTex: THREE.Texture[];
+  earthNormalTex: THREE.Texture;
+  earthCloudsTex: THREE.Texture;
   moonTex: THREE.Texture;
   ringTex: THREE.Texture;
   isSelected: boolean;
@@ -320,6 +421,8 @@ const PlanetSystem = React.memo(function PlanetSystem({
   coAuthors,
   color,
   planetTex,
+  earthNormalTex,
+  earthCloudsTex,
   moonTex,
   ringTex,
   isSelected,
@@ -331,6 +434,9 @@ const PlanetSystem = React.memo(function PlanetSystem({
   const o = planetOrbits[paperId];
   const tex = planetTex[o.texIndex];
   const isSaturn = o.texIndex === SATURN_IDX;
+  const isEarth = o.texIndex === EARTH_IDX;
+  const isRocky = ROCKY.has(o.texIndex);
+  const isGas = GAS.has(o.texIndex);
 
   const orbitLine = useMemo(() => {
     const pts: THREE.Vector3[] = [];
@@ -357,13 +463,36 @@ const PlanetSystem = React.memo(function PlanetSystem({
         <sphereGeometry args={[o.planetRadius, 32, 32]} />
         <meshStandardMaterial
           map={tex}
-          roughness={0.9}
+          normalMap={isEarth ? earthNormalTex : undefined}
+          normalScale={isEarth ? new THREE.Vector2(0.85, 0.85) : undefined}
+          bumpMap={isRocky ? tex : undefined}
+          bumpScale={isRocky ? 0.04 : 0}
+          roughness={isGas ? 0.55 : 0.92}
           metalness={0.0}
           emissive={color}
-          emissiveIntensity={highlighted ? 0.5 : 0.1}
+          emissiveIntensity={highlighted ? 0.5 : 0.05}
           transparent={dimmed}
           opacity={dimmed ? 0.12 : 1}
         />
+
+        {/* Earth: drifting cloud deck + atmospheric rim */}
+        {isEarth && !dimmed && (
+          <>
+            <CloudLayer tex={earthCloudsTex} radius={o.planetRadius} />
+            <mesh scale={1.035}>
+              <sphereGeometry args={[o.planetRadius, 32, 32]} />
+              <meshBasicMaterial
+                color="#5b8bd6"
+                transparent
+                opacity={0.16}
+                side={THREE.BackSide}
+                blending={THREE.AdditiveBlending}
+                depthWrite={false}
+              />
+            </mesh>
+          </>
+        )}
+
         {isSaturn && (
           <mesh rotation={[-Math.PI / 2.3, 0, 0]}>
             <ringGeometry args={[o.planetRadius * 1.4, o.planetRadius * 2.4, 64]} />
@@ -385,6 +514,26 @@ const PlanetSystem = React.memo(function PlanetSystem({
     </group>
   );
 });
+
+function CloudLayer({ tex, radius }: { tex: THREE.Texture; radius: number }) {
+  const ref = useRef<THREE.Mesh>(null);
+  useFrame((_, d) => {
+    if (ref.current) ref.current.rotation.y += d * 0.012;
+  });
+  return (
+    <mesh ref={ref} scale={1.012}>
+      <sphereGeometry args={[radius, 32, 32]} />
+      <meshStandardMaterial
+        map={tex}
+        transparent
+        opacity={0.9}
+        depthWrite={false}
+        roughness={1}
+        metalness={0}
+      />
+    </mesh>
+  );
+}
 
 function Moon({
   tex,
@@ -422,8 +571,8 @@ function Moon({
 
   return (
     <mesh ref={ref}>
-      <sphereGeometry args={[Math.max(0.14, planetRadius * 0.2), 16, 16]} />
-      <meshStandardMaterial map={tex} roughness={0.95} />
+      <sphereGeometry args={[Math.max(0.14, planetRadius * 0.2), 24, 24]} />
+      <meshStandardMaterial map={tex} bumpMap={tex} bumpScale={0.02} roughness={0.95} />
     </mesh>
   );
 }

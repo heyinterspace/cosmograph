@@ -27,12 +27,17 @@ export function Scene() {
         camera={{ position: [INTRO_START.x, INTRO_START.y, INTRO_START.z], fov: 55, near: 0.1, far: 60000 }}
         gl={{ antialias: true, alpha: false, stencil: false }}
         dpr={[1, 1.5]}
+        onCreated={({ gl }) => {
+          gl.toneMapping = THREE.ACESFilmicToneMapping;
+          gl.toneMappingExposure = 1.08;
+        }}
         onPointerMissed={() => setSelectedObject(null)}
       >
         <color attach="background" args={["#03030a"]} />
 
-        <ambientLight intensity={0.35} />
-        <hemisphereLight args={["#3a3f5a", "#0a0a14", 0.35]} />
+        {/* Low fill so the sun pointLights carve dramatic day/night terminators */}
+        <ambientLight intensity={0.16} />
+        <hemisphereLight args={["#2a3050", "#070710", 0.22]} />
 
         <Suspense fallback={null}>
           <Background />
@@ -42,7 +47,13 @@ export function Scene() {
           <CameraController />
 
           <EffectComposer enableNormalPass={false}>
-            <Bloom luminanceThreshold={1.0} mipmapBlur intensity={0.9} radius={0.7} />
+            <Bloom
+              luminanceThreshold={0.9}
+              luminanceSmoothing={0.03}
+              mipmapBlur
+              intensity={1.15}
+              radius={0.85}
+            />
           </EffectComposer>
         </Suspense>
 
