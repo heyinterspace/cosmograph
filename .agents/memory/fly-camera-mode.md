@@ -30,3 +30,13 @@ OrbitControls cannot express.
   during alt-tab sticks thrust on.
 - Galaxy extent is ~2000, clusters ~500; `maxSpeed`/`FLY_START`/damping are tuned
   to that scale and need an in-browser pass (no GPU in the sandbox) to finalize.
+- **Perceived scale lever:** Fly narrows the shared camera FOV on entry and Orbit
+  restores it on entry (set imperatively + `updateProjectionMatrix()`); a wide FOV
+  made the viewer feel "bigger than the planets." Tune scale in order FOV → maxSpeed
+  → accel.
+- **Per-mode camera persistence:** each mode records its latest vantage every frame
+  (Orbit: pos+orbit target; Fly: pos+yaw+pitch) and the mode-enter effects restore
+  it instead of resetting — Fly skips the dive-in once it has a saved vantage.
+  Record continuously in `useFrame`, NOT in a leave effect: OrbitControls unmounts
+  the instant you enter Fly, so `orbitRef` is already null by the time a switch
+  effect runs.

@@ -18,6 +18,11 @@ export const INTRO_START = new THREE.Vector3(0, 2600, 13000);
 const FLY_START = new THREE.Vector3(0, 70, 780);
 const FLY_ENTER_DUR = 1.4;
 
+// Orbit/god uses a normal lens; Fly narrows the lens (aperture) so planets read
+// at a believable scale instead of making the viewer feel larger than them.
+const BASE_FOV = 55;
+const FLY_FOV = 42;
+
 function easeInOutCubic(t: number): number {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
@@ -36,12 +41,35 @@ export function CameraController() {
   const focusing = useRef(false);
   const focusElapsed = useRef(0);
 
+  // Entering Orbit/god: restore the saved orbit vantage if we have one, else
+  // fall back to the home overview. Also reset the lens to the normal FOV.
+  useEffect(() => {
+    if (cameraMode !== "god") return;
+    camera.fov = BASE_FOV;
+    camera.updateProjectionMatrix();
+    if (savedGod.current.has) {
+      focusing.current = false;
+      camera.position.copy(savedGod.current.pos);
+      const o = orbitRef.current;
+      if (o) {
+        o.target.copy(savedGod.current.target);
+        o.enabled = true;
+        o.update();
+      }
+    } else {
+      focusing.current = true;
+      focusElapsed.current = 0;
+      if (orbitRef.current) orbitRef.current.enabled = false;
+    }
+  }, [cameraMode, camera]);
+
+  // Selecting an object while already in Orbit re-frames it (fly-to focus).
   useEffect(() => {
     if (cameraMode !== "god") return;
     focusing.current = true;
     focusElapsed.current = 0;
     if (orbitRef.current) orbitRef.current.enabled = false;
-  }, [cameraMode, selectedObject?.type, selectedObject?.id]);
+  }, [selectedObject?.type, selectedObject?.id]);
 
   // When the intro flight ends, hand off to god/orbit at the galaxy overview.
   useEffect(() => {
@@ -72,8 +100,40 @@ export function CameraController() {
   const flyTargetQuat = useRef(new THREE.Quaternion());
   const roll = useRef(0);
 
+  // Per-mode camera memory: each mode records its latest vantage every frame so
+  // switching out and back restores where you were instead of resetting.
+  const savedGod = useRef<{ pos: THREE.Vector3; target: THREE.Vector3; has: boolean }>({
+    pos: new THREE.Vector3(),
+    target: new THREE.Vector3(),
+    has: false,
+  });
+  const savedFly = useRef<{ pos: THREE.Vector3; yaw: number; pitch: number; has: boolean }>({
+    pos: new THREE.Vector3(),
+    yaw: 0,
+    pitch: 0,
+    has: false,
+  });
+
   useEffect(() => {
     if (cameraMode !== "spaceship") return;
+    // Narrow the lens for Fly so the scale reads correctly.
+    camera.fov = FLY_FOV;
+    camera.updateProjectionMatrix();
+    velocity.current.set(0, 0, 0);
+    roll.current = 0;
+    keys.current = { forward: false, backward: false, left: false, right: false, up: false, down: false, lookLeft: false, lookRight: false, lookUp: false, lookDown: false, rollLeft: false, rollRight: false };
+
+    if (savedFly.current.has) {
+      // Returning to Fly: restore the exact vantage we left, skip the dive-in.
+      flyEntering.current = false;
+      camera.position.copy(savedFly.current.pos);
+      yaw.current = savedFly.current.yaw;
+      pitch.current = savedFly.current.pitch;
+      camera.quaternion.setFromEuler(new THREE.Euler(pitch.current, yaw.current, 0, "YXZ"));
+      return;
+    }
+
+    // First Fly entry: cinematic dive-in toward the galactic plane.
     flyEntering.current = true;
     flyElapsed.current = 0;
     flyFromPos.current.copy(camera.position);
@@ -81,9 +141,6 @@ export function CameraController() {
     // Target orientation: look from the dive vantage toward the galactic core.
     const m = new THREE.Matrix4().lookAt(FLY_START, new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 1, 0));
     flyTargetQuat.current.setFromRotationMatrix(m);
-    velocity.current.set(0, 0, 0);
-    roll.current = 0;
-    keys.current = { forward: false, backward: false, left: false, right: false, up: false, down: false, lookLeft: false, lookRight: false, lookUp: false, lookDown: false, rollLeft: false, rollRight: false };
   }, [cameraMode, camera]);
 
   useEffect(() => {
@@ -275,6 +332,11 @@ export function CameraController() {
         orbit.target.lerp(lookAt, delta * 2);
       }
       if (orbit) orbit.update();
+
+      // Remember this vantage so leaving and returning to Orbit restores it.
+      savedGod.current.pos.copy(state.camera.position);
+      if (orbit) savedGod.current.target.copy(orbit.target);
+      savedGod.current.has = true;
     } else if (cameraMode === "spaceship") {
       // Cinematic dive-in: sweep from the prior view down into the plane before
       // handing control to the player.
@@ -316,8 +378,8 @@ export function CameraController() {
 
       // Momentum-based 6DOF flight. Forward/strafe follow the look direction;
       // vertical uses world up so ascend/descend stay intuitive while pitched.
-      const accel = 1300 * delta;
-      const maxSpeed = 760;
+      const accel = 900 * delta;
+      const maxSpeed = 520;
 
       const move = new THREE.Vector3(
         Number(keys.current.right) - Number(keys.current.left),
@@ -334,6 +396,12 @@ export function CameraController() {
       if (velocity.current.length() > maxSpeed) velocity.current.setLength(maxSpeed);
       state.camera.position.addScaledVector(velocity.current, delta);
       velocity.current.multiplyScalar(1 - Math.min(1, delta * 2.4));
+
+      // Remember this vantage so leaving and returning to Fly restores it.
+      savedFly.current.pos.copy(state.camera.position);
+      savedFly.current.yaw = yaw.current;
+      savedFly.current.pitch = pitch.current;
+      savedFly.current.has = true;
     }
   });
 
