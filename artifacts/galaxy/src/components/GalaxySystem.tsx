@@ -255,6 +255,80 @@ function ellipseR(a: number, e: number, theta: number) {
   return (a * (1 - e * e)) / (1 + e * Math.cos(theta));
 }
 
+// ----- waypoint journey route ---------------------------------------------
+// A faint guided path threading the suns into one continuous route. Because
+// systems are clustered so proximity == relatedness, a nearest-neighbour walk
+// naturally connects related domains together. It doubles as a journey line to
+// follow when flying. Built once (deterministic) from the sun positions.
+export const waypointRoute: string[] = (() => {
+  const ids = galaxyData.domains.map((d) => d.id).filter((id) => domainPositions[id]);
+  if (ids.length <= 1) return ids;
+  const remaining = new Set(ids);
+  // Start from the system nearest the galactic core (origin).
+  let current = ids[0];
+  let best = Infinity;
+  for (const id of ids) {
+    const d = domainPositions[id].lengthSq();
+    if (d < best) { best = d; current = id; }
+  }
+  const order: string[] = [current];
+  remaining.delete(current);
+  while (remaining.size > 0) {
+    const from = domainPositions[current];
+    let next = "";
+    let nd = Infinity;
+    for (const id of remaining) {
+      const d = from.distanceToSquared(domainPositions[id]);
+      if (d < nd) { nd = d; next = id; }
+    }
+    order.push(next);
+    remaining.delete(next);
+    current = next;
+  }
+  return order;
+})();
+
+const WAYPOINT_COLOR = new THREE.Color("#a388ee");
+
+// The journey line is a navigation aid (not a celestial body), so it carries the
+// single UI accent rather than a stellar colour — faint in orbit, a touch
+// brighter while flying so it reads as a route to follow.
+function WaypointPath() {
+  const { cameraMode } = useAppState();
+
+  const line = useMemo(() => {
+    const pts = waypointRoute.map((id) => domainPositions[id]).filter(Boolean);
+    if (pts.length < 2) return null;
+    const curve = new THREE.CatmullRomCurve3(pts, false, "catmullrom", 0.4);
+    const samples = curve.getPoints(Math.max(64, pts.length * 16));
+    const geo = new THREE.BufferGeometry().setFromPoints(samples);
+    const mat = new THREE.LineDashedMaterial({
+      color: WAYPOINT_COLOR,
+      transparent: true,
+      opacity: 0.2,
+      dashSize: 24,
+      gapSize: 18,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      toneMapped: false,
+    });
+    const l = new THREE.Line(geo, mat);
+    l.computeLineDistances();
+    return l;
+  }, []);
+
+  const targetOpacity = cameraMode === "spaceship" ? 0.5 : 0.18;
+  useFrame((s, d) => {
+    const mat = line?.material as THREE.LineDashedMaterial | undefined;
+    if (!mat) return;
+    const pulse = 0.04 * Math.sin(s.clock.elapsedTime * 1.4);
+    mat.opacity += (targetOpacity + pulse - mat.opacity) * Math.min(1, d * 2);
+  });
+
+  if (!line) return null;
+  return <primitive object={line} />;
+}
+
 export function GalaxySystem() {
   const { galaxyTilt, selectedObject, setHoveredObject, setSelectedObject, filters } = useAppState();
 
@@ -312,6 +386,7 @@ export function GalaxySystem() {
 
   return (
     <group rotation-x={galaxyTilt}>
+      <WaypointPath />
       {galaxyData.domains.map((domain, i) => (
         <SolarSystem
           key={domain.id}

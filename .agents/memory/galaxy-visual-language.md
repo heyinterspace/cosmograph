@@ -10,6 +10,8 @@ The Galaxy app uses the **Structured Liquidity** design language (sharp 90° cor
 
 **How to apply:** Keep the 3D world photoreal — real planet/star/moon textures (in `public/textures/`, referenced via `${import.meta.env.BASE_URL}textures/...`) and natural per-domain *stellar* colors (temperature palette in `lib/colors.ts`). Do NOT recolor planets/suns to the UI accent. Apply SL strictly to HTML/2D overlay components.
 
+**Navigation aids ARE the exception:** purely navigational/HUD overlays *inside* the 3D scene (e.g. the dashed waypoint "journey line" threading the suns) intentionally carry the single UI accent `#a388ee`, not a stellar color — they're guidance chrome, not celestial bodies, so the accent ties them to the 2D UI. Keep them faint + additive so they read as a guide over the photoreal scene, never competing with it.
+
 ## God-mode camera must not fight OrbitControls
 In god/orbit mode, do NOT lerp `camera.position` toward a target every frame — that continuously overrides OrbitControls and makes scroll-to-zoom and pan feel broken/"wonky". **Why:** a previous version always pulled the camera back to a target (HOME when nothing selected), so the user's wheel-zoom was undone each frame.
 **How to apply:** run the fly-to lerp only briefly (~1.3s) right after a selection changes, with `controls.enabled=false` during it; then re-enable controls and only gently lerp `controls.target` (the pivot) to keep a selected object centered — never the camera position. Let the wheel/drag own distance and angle.

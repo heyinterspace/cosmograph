@@ -45,8 +45,10 @@ export function CameraController() {
   // fall back to the home overview. Also reset the lens to the normal FOV.
   useEffect(() => {
     if (cameraMode !== "god") return;
-    camera.fov = BASE_FOV;
-    camera.updateProjectionMatrix();
+    if (camera instanceof THREE.PerspectiveCamera) {
+      camera.fov = BASE_FOV;
+      camera.updateProjectionMatrix();
+    }
     if (savedGod.current.has) {
       focusing.current = false;
       camera.position.copy(savedGod.current.pos);
@@ -117,8 +119,10 @@ export function CameraController() {
   useEffect(() => {
     if (cameraMode !== "spaceship") return;
     // Narrow the lens for Fly so the scale reads correctly.
-    camera.fov = FLY_FOV;
-    camera.updateProjectionMatrix();
+    if (camera instanceof THREE.PerspectiveCamera) {
+      camera.fov = FLY_FOV;
+      camera.updateProjectionMatrix();
+    }
     velocity.current.set(0, 0, 0);
     roll.current = 0;
     keys.current = { forward: false, backward: false, left: false, right: false, up: false, down: false, lookLeft: false, lookRight: false, lookUp: false, lookDown: false, rollLeft: false, rollRight: false };
