@@ -44,13 +44,12 @@ export function ChangelogDrawer() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="changelog-drawer-title"
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
             transition={{ type: "spring", stiffness: 320, damping: 34 }}
-            className="custom-scrollbar absolute inset-x-0 bottom-0 mx-auto max-h-[85vh] w-full max-w-2xl overflow-y-auto border-t-2 border-edge bg-bg/95 p-7 backdrop-blur-xl"
+            className="custom-scrollbar absolute right-0 top-0 bottom-0 w-[min(34rem,92vw)] overflow-y-auto border-l-2 border-edge bg-bg/95 p-7 backdrop-blur-xl"
           >
-            <div className="mx-auto mb-5 h-1.5 w-12 rounded-full bg-ink-dim/30" />
             <button
               onClick={() => setChangelogOpen(false)}
               aria-label="Close"
