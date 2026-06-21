@@ -301,7 +301,7 @@ export function CommandBar() {
           <Stat label="Citations" value={stats.totalCitations.toLocaleString()} />
           <Stat label="Co-authors" value={stats.uniqueCoAuthors.toLocaleString()} />
           <Stat label="Years" value={String(stats.yearsActive)} />
-          <Stat label="Words" value={compactNumber(stats.estimatedWords)} />
+          <Stat label="Words" value={`${compactNumber(stats.estimatedWords)}+`} />
         </div>
 
         <div className="hidden md:block w-[2px] self-stretch bg-edge/60" />

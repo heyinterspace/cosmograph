@@ -67,11 +67,11 @@ const BEATS: Beat[] = [
   {
     start: 0.77,
     end: 0.9,
-    kicker: "Roughly",
-    value: new Intl.NumberFormat("en", {
+    kicker: "At least",
+    value: `${new Intl.NumberFormat("en", {
       notation: "compact",
-      maximumFractionDigits: 0,
-    }).format(s.estimatedWords),
+      maximumFractionDigits: 1,
+    }).format(s.estimatedWords)}+`,
     caption: `words written — about ${Math.round(
       s.estimatedWords / 90_000,
     ).toLocaleString()} novels' worth`,
