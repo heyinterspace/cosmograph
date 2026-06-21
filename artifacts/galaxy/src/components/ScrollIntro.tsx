@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Play, Compass } from "lucide-react";
 import { useAppState } from "@/lib/store";
 import { galaxyData } from "@/data/galaxy";
 import { Cockpit } from "./Cockpit";
@@ -325,17 +325,19 @@ export function ScrollIntro() {
             </p>
             <div className="pointer-events-auto relative flex flex-col items-center gap-4 sm:flex-row">
               <button
-                onClick={finishExplore}
+                onClick={finishTour}
                 style={{ background: "var(--accent)", color: "var(--accent-ink)" }}
-                className="glass-panel glass-panel-interactive px-9 py-3.5 font-display text-sm font-semibold uppercase tracking-[0.2em]"
+                className="glass-panel glass-panel-interactive flex items-center gap-2.5 px-9 py-3.5 font-display text-sm font-semibold uppercase tracking-[0.2em]"
               >
-                Explore
+                <Play className="h-4 w-4" />
+                Tour
               </button>
               <button
-                onClick={finishTour}
-                className="glass-panel glass-panel-interactive px-9 py-3.5 font-display text-sm uppercase tracking-[0.2em] text-ink"
+                onClick={finishExplore}
+                className="glass-panel glass-panel-interactive flex items-center gap-2.5 px-9 py-3.5 font-display text-sm uppercase tracking-[0.2em] text-ink"
               >
-                Tour
+                <Compass className="h-4 w-4" />
+                Explore
               </button>
             </div>
           </motion.div>
