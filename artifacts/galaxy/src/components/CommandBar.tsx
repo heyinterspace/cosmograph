@@ -11,6 +11,8 @@ import {
   getMatchingPapers,
 } from "@/data/galaxy";
 import { getDomainColorStr } from "@/lib/colors";
+import { ShareButton } from "./ShareButton";
+import { GitHubLink } from "./GitHubLink";
 
 interface SearchResult {
   type: "sun" | "planet";
@@ -465,6 +467,8 @@ export function CommandBar() {
               <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-accent ring-2 ring-black" />
             )}
           </button>
+          <ShareButton />
+          <GitHubLink />
         </div>
       </motion.div>
     </div>

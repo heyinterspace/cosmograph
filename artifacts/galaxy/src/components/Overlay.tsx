@@ -11,10 +11,7 @@ import { ChangelogDrawer } from "./ChangelogDrawer";
 import { galaxyData } from "@/data/galaxy";
 import { presence } from "@/lib/presence";
 import { useSyncExternalStore } from "react";
-import { Compass, Rewind, Info, Orbit, Github, Star } from "lucide-react";
-import { SITE } from "@/config/site";
-import { useGithubStars, formatStars } from "@/lib/useGithubStars";
-import { ShareButton } from "./ShareButton";
+import { Compass, Rewind, Info, Orbit } from "lucide-react";
 
 export function Overlay() {
   const { introFinished, selectedObject, hoveredObject, searchActive, tourActive } = useAppState();
@@ -93,33 +90,29 @@ function Header() {
   return (
     <div className="absolute top-0 left-0 right-0 p-6 flex items-start justify-between">
       <div>
-        <div className="flex items-center gap-3">
-          <h1 className="pointer-events-none text-3xl font-title font-bold tracking-tight text-ink">Galactic</h1>
+        <div className="flex flex-wrap items-center gap-2">
+          <h1 className="pointer-events-none text-3xl font-title font-bold tracking-tight text-ink mr-1">Galactic</h1>
           <InfoButton />
           <ModeToggle />
+          <button
+            onClick={replayIntro}
+            className="glass-panel glass-panel-interactive flex items-center gap-2 px-4 py-2 text-xs font-display uppercase tracking-wider text-ink pointer-events-auto"
+          >
+            <Rewind size={14} />
+            Replay
+          </button>
+          <button
+            onClick={startTour}
+            className="glass-panel glass-panel-interactive flex items-center gap-2 px-4 py-2 text-xs font-display uppercase tracking-wider text-ink pointer-events-auto"
+          >
+            <Compass size={14} />
+            Tour
+          </button>
         </div>
         <p className="pointer-events-none text-ink-dim font-mono text-[11px] mt-1 uppercase tracking-widest">
           A Journey of Scientific Exploration · {galaxyData.author.name}
         </p>
         <LivePresence />
-      </div>
-      <div className="flex items-center gap-2">
-        <ShareButton />
-        <GitHubLink />
-        <button
-          onClick={replayIntro}
-          className="glass-panel glass-panel-interactive flex items-center gap-2 px-4 py-2 text-xs font-display uppercase tracking-wider text-ink pointer-events-auto"
-        >
-          <Rewind size={14} />
-          Replay
-        </button>
-        <button
-          onClick={startTour}
-          className="glass-panel glass-panel-interactive flex items-center gap-2 px-4 py-2 text-xs font-display uppercase tracking-wider text-ink pointer-events-auto"
-        >
-          <Compass size={14} />
-          Tour
-        </button>
       </div>
     </div>
   );
@@ -136,30 +129,6 @@ function LivePresence() {
       </span>
       <span className="text-ink">{count}</span> galacticon{count === 1 ? "" : "s"} streaming now
     </div>
-  );
-}
-
-function GitHubLink() {
-  const { stars, url } = useGithubStars();
-
-  return (
-    <a
-      href={url ?? SITE.github.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label="View source on GitHub"
-      title="View source on GitHub"
-      className="glass-panel glass-panel-interactive flex items-center gap-2 px-4 py-2 text-xs font-display uppercase tracking-wider text-ink pointer-events-auto"
-    >
-      <Github size={14} />
-      GitHub
-      {stars !== null && (
-        <span className="inline-flex items-center gap-0.5 text-accent">
-          <Star size={11} className="fill-current" />
-          {formatStars(stars)}
-        </span>
-      )}
-    </a>
   );
 }
 

@@ -11,10 +11,9 @@ export function ShareButton() {
         onClick={() => setOpen(true)}
         aria-label="Share this galaxy"
         title="Share this galaxy"
-        className="glass-panel glass-panel-interactive flex items-center gap-2 px-4 py-2 text-xs font-display uppercase tracking-wider text-ink pointer-events-auto"
+        className="flex h-11 w-11 items-center justify-center border-2 border-edge bg-white/5 text-ink transition-all hover:bg-white/10 pointer-events-auto md:h-9 md:w-9"
       >
-        <Share2 size={14} />
-        Share
+        <Share2 size={15} />
       </button>
       <ShareModal open={open} onClose={() => setOpen(false)} />
     </>
