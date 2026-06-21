@@ -232,7 +232,7 @@ async function main() {
       url: w.doi || w.primary_location?.landing_page_url || w.id,
       citations: w.cited_by_count || 0,
       topic: pt?.display_name || null,
-      subfield: pt?.subfield?.display_name || null,
+      subfield: pt?.subfield?.display_name?.replace(/\s+Research$/i, "") || null,
       field: pt?.field?.display_name || null,
       domainName: pt?.domain?.display_name || null,
       relevance: typeof pt?.score === "number" ? pt.score : 0.5,
