@@ -10,8 +10,6 @@ export function setGalaxyCanvas(el: HTMLCanvasElement | null): void {
   galaxyCanvas = el;
 }
 
-export type ShareOutcome = "shared" | "downloaded" | "copied" | "cancelled" | "error";
-
 const CARD_W = 1200;
 const CARD_H = 630;
 
@@ -57,9 +55,18 @@ function slugify(s: string): string {
   );
 }
 
+export function getShareUrl(): string {
+  return typeof window !== "undefined" ? window.location.href : `https://${SITE.domain}`;
+}
+
+export function getShareText(): string {
+  return `Explore ${galaxyData.author.name}'s life in science as an interactive galaxy.`;
+}
+
 // Compose the rich share card: the current galaxy view + headline stats, styled
-// to match the app so it reads as a single branded artifact when shared.
-async function buildShareCard(): Promise<Blob | null> {
+// to match the app so it reads as a single branded artifact when shared. Returns
+// a PNG blob (PNG is the format browsers accept for clipboard image writes).
+export async function buildShareCard(): Promise<Blob | null> {
   const card = document.createElement("canvas");
   card.width = CARD_W;
   card.height = CARD_H;
@@ -173,80 +180,65 @@ async function buildShareCard(): Promise<Blob | null> {
   ctx.textAlign = "left";
 
   return new Promise<Blob | null>((resolve) => {
-    card.toBlob((b) => resolve(b), "image/jpeg", 0.92);
+    card.toBlob((b) => resolve(b), "image/png");
   });
 }
 
-// Share the galaxy as a rich image card. Prefers the native share sheet with the
-// image attached (the viral path, great on mobile); degrades to a link-only share,
-// then to saving the image + copying the link on desktops without Web Share.
-export async function shareGalaxy(): Promise<ShareOutcome> {
-  const shareUrl =
-    typeof window !== "undefined" ? window.location.href : `https://${SITE.domain}`;
-  const title = "Galactic";
-  const text = `Explore ${galaxyData.author.name}'s life in science as an interactive galaxy.`;
-
-  let blob: Blob | null = null;
+/** Copy the rendered card image to the clipboard. Returns false if unsupported/blocked. */
+export async function copyImageToClipboard(blob: Blob): Promise<boolean> {
   try {
-    blob = await buildShareCard();
+    if (typeof ClipboardItem === "undefined") return false;
+    const nav = typeof navigator !== "undefined" ? navigator : undefined;
+    if (!nav?.clipboard?.write) return false;
+    await nav.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
+    return true;
   } catch {
-    blob = null;
+    return false;
   }
+}
 
+/** Copy the shareable link to the clipboard. Returns false if unsupported/blocked. */
+export async function copyShareLink(): Promise<boolean> {
   const nav = typeof navigator !== "undefined" ? navigator : undefined;
-
-  // 1. Native share with the image file attached.
-  if (blob && nav && typeof nav.canShare === "function" && typeof nav.share === "function") {
-    const file = new File([blob], `galactic-${slugify(galaxyData.author.name)}.jpg`, {
-      type: "image/jpeg",
-    });
-    if (nav.canShare({ files: [file] })) {
-      try {
-        await nav.share({ files: [file], title, text, url: shareUrl });
-        return "shared";
-      } catch (e) {
-        if ((e as DOMException)?.name === "AbortError") return "cancelled";
-        /* fall through to link-only / download */
-      }
-    }
+  if (!nav?.clipboard?.writeText) return false;
+  try {
+    await nav.clipboard.writeText(getShareUrl());
+    return true;
+  } catch {
+    return false;
   }
+}
 
-  // 2. Native share, link only.
-  if (nav && typeof nav.share === "function") {
-    try {
-      await nav.share({ title, text, url: shareUrl });
-      return "shared";
-    } catch (e) {
-      if ((e as DOMException)?.name === "AbortError") return "cancelled";
-      /* fall through */
-    }
+/** Whether the native share sheet can take the image file (mostly mobile). */
+export function canNativeShareFiles(): boolean {
+  const nav = typeof navigator !== "undefined" ? navigator : undefined;
+  if (!nav || typeof nav.canShare !== "function") return false;
+  try {
+    const probe = new File([new Blob()], "probe.png", { type: "image/png" });
+    return nav.canShare({ files: [probe] });
+  } catch {
+    return false;
   }
+}
 
-  // 3. Desktop fallback: copy the link and hand over the image card.
-  let copied = false;
-  if (nav?.clipboard) {
-    try {
-      await nav.clipboard.writeText(shareUrl);
-      copied = true;
-    } catch {
-      /* clipboard blocked */
-    }
-  }
-  if (blob) {
-    try {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `galactic-${slugify(galaxyData.author.name)}.jpg`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-      return "downloaded";
-    } catch {
-      /* download blocked */
-    }
-  }
+export type NativeShareOutcome = "shared" | "cancelled" | "error";
 
-  return copied ? "copied" : "error";
+/** Open the OS share sheet with the card image attached. */
+export async function nativeShareCard(blob: Blob): Promise<NativeShareOutcome> {
+  const nav = typeof navigator !== "undefined" ? navigator : undefined;
+  if (!nav || typeof nav.share !== "function") return "error";
+  const file = new File([blob], `galactic-${slugify(galaxyData.author.name)}.png`, {
+    type: blob.type,
+  });
+  try {
+    if (typeof nav.canShare === "function" && nav.canShare({ files: [file] })) {
+      await nav.share({ files: [file], title: "Galactic", text: getShareText(), url: getShareUrl() });
+    } else {
+      await nav.share({ title: "Galactic", text: getShareText(), url: getShareUrl() });
+    }
+    return "shared";
+  } catch (e) {
+    if ((e as DOMException)?.name === "AbortError") return "cancelled";
+    return "error";
+  }
 }
