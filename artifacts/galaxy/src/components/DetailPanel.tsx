@@ -40,8 +40,14 @@ export function DetailPanel() {
 }
 
 function DomainDetail({ id }: { id: string }) {
+  const { setCameraMode, setSelectedObject } = useAppState();
   const domain = getDomain(id);
   const colorStr = getDomainColorStr(galaxyData.domains.findIndex((d) => d.id === id));
+
+  const goToPaper = (paperId: string) => {
+    setCameraMode("god");
+    setSelectedObject({ type: "planet", id: paperId });
+  };
 
   if (!domain) return <div className="text-ink-dim">Domain not found</div>;
 
@@ -67,13 +73,19 @@ function DomainDetail({ id }: { id: string }) {
         <div className="font-mono text-[10px] uppercase tracking-widest text-ink-dim mb-3">Top Papers</div>
         <div className="space-y-2">
           {topPapers.map((p) => (
-            <div key={p.id} className="bg-white/5 border-2 border-edge p-3 text-sm">
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => goToPaper(p.id)}
+              title="Fly to this planet"
+              className="block w-full text-left bg-white/5 border-2 border-edge p-3 text-sm transition-colors hover:bg-accent/15 hover:border-accent"
+            >
               <div className="text-ink line-clamp-2 leading-snug mb-2">{p.title}</div>
               <div className="flex gap-3 font-mono text-[11px]">
                 <span className="text-accent">{p.citations} citations</span>
                 {p.year && <span className="text-ink-dim">{p.year}</span>}
               </div>
-            </div>
+            </button>
           ))}
         </div>
       </div>
