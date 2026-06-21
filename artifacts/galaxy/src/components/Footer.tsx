@@ -40,7 +40,7 @@ export function Footer() {
           .
         </span>
       </div>
-      <p className="max-w-2xl text-center font-mono text-[10px] leading-relaxed tracking-wide text-ink-dim/55">
+      <p className="max-w-5xl text-center font-mono text-[10px] leading-relaxed tracking-wide text-ink-dim/55">
         Any scientist's lifetime of research, rendered as an explorable galaxy —
         research domains are suns, papers are orbiting planets, co-authors are moons.
       </p>
