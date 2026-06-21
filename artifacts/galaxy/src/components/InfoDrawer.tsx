@@ -58,10 +58,6 @@ export function InfoDrawer() {
 
             <div className="mx-auto mb-5 h-1.5 w-12 rounded-full bg-ink-dim/30" />
 
-            <div className="mb-7">
-              <ResearcherSearch />
-            </div>
-
             <span className="font-mono text-[10px] uppercase tracking-widest text-accent">
               About this Venture
             </span>
@@ -194,6 +190,10 @@ export function InfoDrawer() {
               <p className="mt-3 font-mono text-[10px] leading-relaxed text-ink-dim/70">
                 On touch: drag with one finger to pan, pinch to zoom & rotate.
               </p>
+            </div>
+
+            <div className="mt-8 border-t-2 border-edge pt-6">
+              <ResearcherSearch />
             </div>
 
             <p className="mt-8 border-t-2 border-edge pt-4 font-mono text-[11px] leading-relaxed text-ink-dim">
