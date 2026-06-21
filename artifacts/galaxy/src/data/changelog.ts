@@ -17,6 +17,18 @@ export interface ChangelogEntry {
  */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.0.0",
+    codename: "Open Universe",
+    date: "2026-06-21",
+    summary: "The galaxy opens to every scientist in the sky.",
+    changes: [
+      "Explore anyone: search a researcher by name and the whole galaxy re-forms around their life's work, charted live from OpenAlex.",
+      "Share this Galactic: capture your current view as a stat-laden card and copy it straight to the clipboard — no downloads, no detours.",
+      "Bridge refit: Replay and Tour moved up beside Orbit and Fly, while Share and the GitHub beacon dropped into the command bar.",
+      "A new footer beacon spells out what Galactic is for every first-time arrival.",
+    ],
+  },
+  {
     version: "1.3.0",
     codename: "Bridge Console",
     date: "2026-06-20",
