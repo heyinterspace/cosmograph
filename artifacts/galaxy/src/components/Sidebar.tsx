@@ -503,10 +503,16 @@ export function Sidebar() {
             transition={{ duration: 0.18 }}
             className="flex h-full w-full flex-col items-center gap-1 p-1.5"
           >
+            {/* Header — mirrors the expanded console header (collapse toggle) */}
             <RailButton onClick={() => setOpen(true)} label="Expand console">
               <ChevronLeft size={16} />
             </RailButton>
             <Divider />
+            {/* Share */}
+            <GitHubLink compact />
+            <ShareButton />
+            <Divider />
+            {/* Navigate */}
             <RailButton onClick={() => setInfoOpen(true)} label="Info">
               <Info size={16} />
             </RailButton>
@@ -531,6 +537,7 @@ export function Sidebar() {
               <Rewind size={15} />
             </RailButton>
             <Divider />
+            {/* Filter (search lives in this section when expanded) */}
             <RailButton onClick={expandWithSearch} label="Search">
               <Search size={16} />
             </RailButton>
@@ -540,8 +547,6 @@ export function Sidebar() {
                 <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-accent ring-2 ring-black" />
               )}
             </RailButton>
-            <ShareButton />
-            <GitHubLink compact />
           </motion.div>
         )}
       </AnimatePresence>
