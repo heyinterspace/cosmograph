@@ -1,6 +1,7 @@
 import { createServer } from "node:http";
 import app from "./app";
 import { attachPresence } from "./presence/server";
+import { initStripe } from "./lib/stripeSetup";
 import { logger } from "./lib/logger";
 
 const rawPort = process.env["PORT"];
@@ -19,6 +20,9 @@ if (Number.isNaN(port) || port <= 0) {
 
 const server = createServer(app);
 attachPresence(server);
+
+// Best-effort, non-fatal: initializes Stripe sync + webhook when connected.
+void initStripe();
 
 server.listen(port, () => {
   logger.info({ port }, "Server listening");

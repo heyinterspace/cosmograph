@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useCallback, useRef, ReactNode } from 'react';
-import { Filters, makeDefaultFilters, applyDataset, galaxyData } from '@/data/galaxy';
+import React, { createContext, useContext, useState, useCallback, useRef, useMemo, ReactNode } from 'react';
+import { Filters, makeDefaultFilters, applyDataset, galaxyData, isDefaultAuthor } from '@/data/galaxy';
 import { buildGalaxyData } from '@/data/buildGalaxy';
 import { fetchAuthor, fetchAuthorWorks, type AuthorCandidate } from '@/lib/openalex';
 import { rebuildLayout } from '@/components/GalaxySystem';
@@ -45,6 +45,15 @@ interface AppState {
   startTour: () => void;
   endTour: () => void;
   setTourStopIndex: (i: number) => void;
+  // Entitlement / paywall. The default baked scientist is always free; deep
+  // exploration (fly, tour, rich planet detail) of any OTHER searched scientist
+  // requires the one-time global account unlock (entitled).
+  entitled: boolean;
+  setEntitlement: (val: boolean) => void;
+  isDefaultScientist: boolean;
+  canExplore: boolean;
+  paywallOpen: boolean;
+  setPaywallOpen: (val: boolean) => void;
   infoOpen: boolean;
   setInfoOpen: (val: boolean) => void;
   changelogOpen: boolean;
@@ -125,7 +134,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setInfoOpen(false);
     setChangelogOpen(false);
   }, []);
-  const [cameraMode, setCameraMode] = useState<CameraMode>('god');
+  const [cameraMode, setCameraModeState] = useState<CameraMode>('god');
   const [selectedObject, setSelectedObject] = useState<SelectedObject>(null);
   const [hoveredObject, setHoveredObject] = useState<HoveredObject>(null);
   const [searchActive, setSearchActive] = useState<boolean>(false);
@@ -144,6 +153,23 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [tourStopIndex, setTourStopIndex] = useState(0);
   const [infoOpen, setInfoOpen] = useState(false);
   const [changelogOpen, setChangelogOpen] = useState(false);
+
+  // Entitlement: the one-time global account unlock. Mirrored into a ref so the
+  // gated handlers below read the current value without a stale closure.
+  const [entitled, setEntitledState] = useState(false);
+  const entitledRef = useRef(false);
+  const setEntitlement = useCallback((val: boolean) => {
+    entitledRef.current = val;
+    setEntitledState(val);
+  }, []);
+  const [paywallOpen, setPaywallOpen] = useState(false);
+
+  // Live gate check for handlers: free on the default scientist, otherwise needs
+  // the unlock. Reads galaxyData live (mutable binding) + the entitlement ref.
+  const canExploreNow = useCallback(
+    () => isDefaultAuthor() || entitledRef.current,
+    [],
+  );
 
   const [datasetVersion, setDatasetVersion] = useState(0);
   const [datasetStatus, setDatasetStatus] = useState<DatasetStatus>('idle');
@@ -177,7 +203,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       setSearchActive(false);
       setTourActive(false);
       setTourStopIndex(0);
-      setCameraMode('god');
+      setCameraModeState('god');
       setFiltersState(makeDefaultFilters());
       setActiveAuthorLabel(data.author.name);
       setDatasetVersion((v) => v + 1);
@@ -200,16 +226,45 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setLoadProgress(null);
   }, []);
 
-  const startTour = () => {
+  // Gated camera switch: only "spaceship" (fly) is paywalled — "god"/orbit is
+  // always free. Reads the gate live so it stays correct after a dataset swap.
+  const setCameraMode = useCallback(
+    (mode: CameraMode) => {
+      if (mode === 'spaceship' && !canExploreNow()) {
+        setPaywallOpen(true);
+        return;
+      }
+      setCameraModeState(mode);
+    },
+    [canExploreNow],
+  );
+
+  const startTour = useCallback(() => {
+    if (!canExploreNow()) {
+      setPaywallOpen(true);
+      return;
+    }
     setSelectedObject(null);
-    setCameraMode('god');
+    setCameraModeState('god');
     setTourStopIndex(0);
     setTourActive(true);
-  };
+  }, [canExploreNow]);
 
   const endTour = () => {
     setTourActive(false);
   };
+
+  // Render-time gate flags. isDefaultScientist recomputes on a dataset swap
+  // (datasetVersion bumps after applyDataset), and canExplore folds in entitled.
+  const isDefaultScientist = useMemo(
+    () => isDefaultAuthor(),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [datasetVersion],
+  );
+  const canExplore = useMemo(
+    () => isDefaultScientist || entitled,
+    [isDefaultScientist, entitled],
+  );
 
   return (
     <AppStateContext.Provider
@@ -239,6 +294,12 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
         startTour,
         endTour,
         setTourStopIndex,
+        entitled,
+        setEntitlement,
+        isDefaultScientist,
+        canExplore,
+        paywallOpen,
+        setPaywallOpen,
         infoOpen,
         setInfoOpen,
         changelogOpen,

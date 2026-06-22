@@ -1,7 +1,7 @@
 import { useAppState } from "@/lib/store";
 import { galaxyData, getDomain, papersByDomain } from "@/data/galaxy";
 import { motion } from "framer-motion";
-import { X, ExternalLink } from "lucide-react";
+import { X, ExternalLink, Lock } from "lucide-react";
 import { getDomainColorStr } from "@/lib/colors";
 
 export function DetailPanel() {
@@ -40,7 +40,8 @@ export function DetailPanel() {
 }
 
 function DomainDetail({ id }: { id: string }) {
-  const { setCameraMode, setSelectedObject } = useAppState();
+  const { setCameraMode, setSelectedObject, canExplore, setPaywallOpen } =
+    useAppState();
   const domain = getDomain(id);
   const colorStr = getDomainColorStr(galaxyData.domains.findIndex((d) => d.id === id));
 
@@ -69,31 +70,59 @@ function DomainDetail({ id }: { id: string }) {
         <Metric label="Citations" value={domain.totalCitations.toLocaleString()} />
       </div>
 
-      <div>
-        <div className="font-mono text-[10px] uppercase tracking-widest text-ink-dim mb-3">Top Papers</div>
-        <div className="space-y-2">
-          {topPapers.map((p) => (
-            <button
-              key={p.id}
-              type="button"
-              onClick={() => goToPaper(p.id)}
-              title="Fly to this planet"
-              className="block w-full text-left bg-white/5 border-2 border-edge p-3 text-sm transition-colors hover:bg-accent/15 hover:border-accent"
-            >
-              <div className="text-ink line-clamp-2 leading-snug mb-2">{p.title}</div>
-              <div className="flex gap-3 font-mono text-[11px]">
-                <span className="text-accent">{p.citations} citations</span>
-                {p.year && <span className="text-ink-dim">{p.year}</span>}
-              </div>
-            </button>
-          ))}
+      {/* Rich domain exploration — flying to individual papers — is part of the
+          paid deep-dive. Locked scientists see the headline stats above plus an
+          unlock prompt instead of the navigable Top Papers list. */}
+      {canExplore ? (
+        <div>
+          <div className="font-mono text-[10px] uppercase tracking-widest text-ink-dim mb-3">Top Papers</div>
+          <div className="space-y-2">
+            {topPapers.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => goToPaper(p.id)}
+                title="Fly to this planet"
+                className="block w-full text-left bg-white/5 border-2 border-edge p-3 text-sm transition-colors hover:bg-accent/15 hover:border-accent"
+              >
+                <div className="text-ink line-clamp-2 leading-snug mb-2">{p.title}</div>
+                <div className="flex gap-3 font-mono text-[11px]">
+                  <span className="text-accent">{p.citations} citations</span>
+                  {p.year && <span className="text-ink-dim">{p.year}</span>}
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="border-2 border-accent/50 bg-accent/5 p-4 space-y-3">
+          <div className="flex items-center gap-2 text-accent">
+            <Lock size={14} />
+            <span className="font-mono text-[10px] uppercase tracking-widest">
+              Locked exploration
+            </span>
+          </div>
+          <p className="text-[13px] leading-relaxed text-ink-dim">
+            Unlock full exploration to dive into this domain's top papers, fly the
+            galaxy, and take the guided tour of any researcher you search.
+          </p>
+          <button
+            type="button"
+            onClick={() => setPaywallOpen(true)}
+            style={{ background: "var(--accent)" }}
+            className="glass-panel glass-panel-interactive flex items-center justify-center gap-2 w-full py-2.5 text-accent-foreground font-display text-[11px] uppercase tracking-widest"
+          >
+            <Lock size={13} />
+            <span>Unlock for $10</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 }
 
 function PlanetDetail({ id }: { id: string }) {
+  const { canExplore, setPaywallOpen } = useAppState();
   const paper = galaxyData.papers.find((p) => p.id === id);
   if (!paper) return <div className="text-ink-dim">Paper not found</div>;
 
@@ -115,14 +144,41 @@ function PlanetDetail({ id }: { id: string }) {
         </div>
       </div>
 
-      {paper.venue && (
+      {/* Free preview for a non-default searched scientist: stop at the headline
+          stats above and offer the unlock. Venue / full co-author list / source
+          link are part of deep exploration. */}
+      {!canExplore && (
+        <div className="border-2 border-accent/50 bg-accent/5 p-4 space-y-3">
+          <div className="flex items-center gap-2 text-accent">
+            <Lock size={14} />
+            <span className="font-mono text-[10px] uppercase tracking-widest">
+              Locked preview
+            </span>
+          </div>
+          <p className="text-[13px] leading-relaxed text-ink-dim">
+            Unlock full exploration to see this paper's venue, every co-author,
+            and a link to the source — plus fly and tour any galaxy.
+          </p>
+          <button
+            type="button"
+            onClick={() => setPaywallOpen(true)}
+            style={{ background: "var(--accent)" }}
+            className="glass-panel glass-panel-interactive flex items-center justify-center gap-2 w-full py-2.5 text-accent-foreground font-display text-[11px] uppercase tracking-widest"
+          >
+            <Lock size={13} />
+            <span>Unlock for $10</span>
+          </button>
+        </div>
+      )}
+
+      {canExplore && paper.venue && (
         <div className="text-sm">
           <div className="font-mono text-[10px] uppercase tracking-widest text-ink-dim mb-1">Venue</div>
           <div className="text-ink">{paper.venue}</div>
         </div>
       )}
 
-      {paper.coAuthors.length > 0 && (
+      {canExplore && paper.coAuthors.length > 0 && (
         <div className="text-sm">
           <div className="font-mono text-[10px] uppercase tracking-widest text-ink-dim mb-2">
             Co-authors ({paper.coAuthorCount})
@@ -137,7 +193,7 @@ function PlanetDetail({ id }: { id: string }) {
         </div>
       )}
 
-      {paper.url && (
+      {canExplore && paper.url && (
         <a
           href={paper.url}
           target="_blank"

@@ -1,0 +1,10 @@
+<svg width="160" height="40" viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g transform="translate(20 20)">
+    <ellipse cx="0" cy="0" rx="16" ry="6" stroke="#a388ee" stroke-width="2" fill="none" opacity="0.55"/>
+    <ellipse cx="0" cy="0" rx="16" ry="6" stroke="#a388ee" stroke-width="2" fill="none" opacity="0.35" transform="rotate(60)"/>
+    <ellipse cx="0" cy="0" rx="16" ry="6" stroke="#a388ee" stroke-width="2" fill="none" opacity="0.35" transform="rotate(120)"/>
+    <circle cx="0" cy="0" r="4" fill="#a388ee"/>
+    <circle cx="16" cy="0" r="2" fill="#e6e6e6"/>
+  </g>
+  <text x="44" y="26" font-family="Archivo, sans-serif" font-size="18" font-weight="800" letter-spacing="-0.5" fill="#e6e6e6">Cosmograph</text>
+</svg>

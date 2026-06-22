@@ -71,6 +71,20 @@ export interface GalaxyData {
 // is remounted (key={datasetVersion}) so every component re-reads fresh values.
 export let galaxyData: GalaxyData = raw as GalaxyData;
 
+// The OpenAlex id baked into the shipped snapshot. The default scientist is
+// always free to explore fully; only OTHER scientists searched live require the
+// one-time unlock. Read from `raw` (never reassigned) so a live dataset swap
+// can be compared against the original default.
+export const DEFAULT_AUTHOR_ID: string | null =
+  (raw as GalaxyData).author.openAlexId ?? null;
+
+// True when the active dataset is still the baked default scientist. Read live
+// (galaxyData is a mutable module binding swapped by applyDataset).
+export function isDefaultAuthor(): boolean {
+  const current = galaxyData.author.openAlexId ?? null;
+  return DEFAULT_AUTHOR_ID != null && current === DEFAULT_AUTHOR_ID;
+}
+
 function computePapersByDomain(d: GalaxyData): Record<string, Paper[]> {
   return d.domains.reduce(
     (acc, dom) => {

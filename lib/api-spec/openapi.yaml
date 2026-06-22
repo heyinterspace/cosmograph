@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: billing
+    description: Accounts, entitlement and one-time purchase
 paths:
   /healthz:
     get:
@@ -24,6 +26,77 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /me/entitlement:
+    get:
+      operationId: getEntitlement
+      tags: [billing]
+      summary: Current account entitlement
+      description: >
+        Returns whether the signed-in account has unlocked full exploration
+        (the one-time purchase). Requires an authenticated session; the galaxy
+        default scientist never calls this since it is always free.
+      responses:
+        "200":
+          description: Entitlement state for the signed-in account
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Entitlement"
+        "401":
+          description: Not signed in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /billing/checkout:
+    post:
+      operationId: createCheckout
+      tags: [billing]
+      summary: Start the one-time unlock checkout
+      description: >
+        Creates a Stripe Checkout session (mode=payment) for the one-time
+        full-exploration unlock and returns its hosted URL. If the account is
+        already entitled, returns alreadyEntitled=true and no URL.
+      responses:
+        "200":
+          description: Checkout session created (or account already entitled)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckoutSession"
+        "401":
+          description: Not signed in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /billing/confirm:
+    post:
+      operationId: confirmCheckout
+      tags: [billing]
+      summary: Confirm a completed checkout session
+      description: >
+        Verifies a returned Stripe Checkout session directly against Stripe and,
+        when paid and owned by the signed-in account, marks the account entitled.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConfirmRequest"
+      responses:
+        "200":
+          description: Updated entitlement state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Entitlement"
+        "401":
+          description: Not signed in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +106,42 @@ components:
           type: string
       required:
         - status
-
+    Entitlement:
+      type: object
+      properties:
+        entitled:
+          type: boolean
+          description: Whether full exploration is unlocked for this account.
+        email:
+          type: string
+          nullable: true
+          description: The account's primary email, when known.
+      required:
+        - entitled
+    CheckoutSession:
+      type: object
+      properties:
+        url:
+          type: string
+          nullable: true
+          description: Hosted Stripe Checkout URL to redirect to, when a session was created.
+        alreadyEntitled:
+          type: boolean
+          description: True when the account already owns the unlock; no checkout was created.
+      required:
+        - alreadyEntitled
+    ConfirmRequest:
+      type: object
+      properties:
+        sessionId:
+          type: string
+          description: The Stripe Checkout session id returned on the success redirect.
+      required:
+        - sessionId
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error

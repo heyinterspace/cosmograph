@@ -20,6 +20,8 @@ import {
   Check,
   Sparkles,
   Heart,
+  Lock,
+  UserRound,
 } from "lucide-react";
 import { useAppState } from "@/lib/store";
 import {
@@ -34,6 +36,7 @@ import { getDomainColorStr } from "@/lib/colors";
 import { SITE } from "@/config/site";
 import { ShareButton } from "./ShareButton";
 import { GitHubLink } from "./GitHubLink";
+import { AccountIndicator, AccountIndicatorRail } from "./AccountIndicator";
 
 interface SearchResult {
   type: "sun" | "planet";
@@ -57,6 +60,7 @@ export function Sidebar() {
     setInfoOpen,
     replayIntro,
     startTour,
+    canExplore,
     consoleOpen: open,
     setConsoleOpen: setOpen,
   } = useAppState();
@@ -203,13 +207,23 @@ export function Sidebar() {
 
             {/* Scroll body */}
             <div className="flex flex-col gap-4 overflow-y-auto custom-scrollbar p-3">
+              {/* Account */}
+              <CollapsibleSection
+                icon={<UserRound size={15} />}
+                title="Account"
+                isOpen={openSections.account}
+                onToggle={() => toggleSection("account")}
+                first
+              >
+                <AccountIndicator />
+              </CollapsibleSection>
+
               {/* Customize */}
               <CollapsibleSection
                 icon={<Sparkles size={15} />}
                 title="Customize"
                 isOpen={openSections.customize}
                 onToggle={() => toggleSection("customize")}
-                first
               >
                 <div className="flex flex-col gap-1.5">
                   <a
@@ -264,11 +278,13 @@ export function Sidebar() {
                     onClick={() => setCameraMode("spaceship")}
                     icon={<Compass size={14} />}
                     label="Fly"
+                    locked={!canExplore}
                   />
                   <ConsoleButton
                     onClick={startTour}
                     icon={<Map size={14} />}
                     label="Tour"
+                    locked={!canExplore}
                   />
                   <ConsoleButton
                     onClick={replayIntro}
@@ -519,6 +535,9 @@ export function Sidebar() {
               <ChevronLeft size={16} />
             </RailButton>
             <Divider />
+            {/* Account */}
+            <AccountIndicatorRail />
+            <Divider />
             {/* Customize */}
             <a
               href={SITE.github.sponsors}
@@ -550,10 +569,11 @@ export function Sidebar() {
               active={cameraMode === "spaceship"}
               onClick={() => setCameraMode("spaceship")}
               label="Fly"
+              locked={!canExplore}
             >
               <Compass size={15} />
             </RailButton>
-            <RailButton onClick={startTour} label="Tour">
+            <RailButton onClick={startTour} label="Tour" locked={!canExplore}>
               <Map size={16} />
             </RailButton>
             <RailButton onClick={replayIntro} label="Replay">
@@ -577,10 +597,11 @@ export function Sidebar() {
   );
 }
 
-type SectionKey = "customize" | "share" | "navigate" | "filter";
+type SectionKey = "account" | "customize" | "share" | "navigate" | "filter";
 
 const SECTION_STORAGE_KEY = "galaxy.console.sections";
 const DEFAULT_SECTIONS: Record<SectionKey, boolean> = {
+  account: true,
   customize: true,
   share: true,
   navigate: true,
@@ -673,17 +694,19 @@ function ConsoleButton({
   onClick,
   icon,
   label,
+  locked = false,
 }: {
   active?: boolean;
   onClick: () => void;
   icon: React.ReactNode;
   label: string;
+  locked?: boolean;
 }) {
   return (
     <button
       onClick={onClick}
       aria-pressed={active}
-      title={label}
+      title={locked ? `${label} — unlock to explore` : label}
       style={active ? { background: "var(--accent)" } : undefined}
       className={`flex w-full items-center gap-2 border-2 border-edge px-3 py-2 text-[11px] font-display uppercase tracking-wider transition-all ${
         active ? "text-accent-foreground" : "bg-white/5 text-ink hover:bg-white/10"
@@ -691,6 +714,7 @@ function ConsoleButton({
     >
       {icon}
       {label}
+      {locked && <Lock size={11} className="ml-auto opacity-70" />}
     </button>
   );
 }
@@ -700,24 +724,31 @@ function RailButton({
   onClick,
   label,
   children,
+  locked = false,
 }: {
   active?: boolean;
   onClick: () => void;
   label: string;
   children: React.ReactNode;
+  locked?: boolean;
 }) {
   return (
     <button
       onClick={onClick}
       aria-pressed={active}
-      aria-label={label}
-      title={label}
+      aria-label={locked ? `${label} — unlock to explore` : label}
+      title={locked ? `${label} — unlock to explore` : label}
       style={active ? { background: "var(--accent)" } : undefined}
       className={`relative flex h-9 w-9 items-center justify-center border-2 border-edge transition-all ${
         active ? "text-accent-foreground" : "bg-white/5 text-ink hover:bg-white/10"
       }`}
     >
       {children}
+      {locked && (
+        <span className="absolute -right-1 -top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-accent text-accent-foreground">
+          <Lock size={8} />
+        </span>
+      )}
     </button>
   );
 }

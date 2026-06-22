@@ -27,6 +27,19 @@ export const CHANGELOG: ChangelogEntry[] = [
     ],
   },
   {
+    version: "2.1.0",
+    codename: "Voyager's Pass",
+    date: "2026-06-22",
+    summary: "Chart any sky for free; unlock the helm to fly it.",
+    changes: [
+      "Accounts have landed: sign in to carry your unlock across every visit.",
+      "Every searched scientist opens as a free preview — full stats, summary, and a shareable card, no account needed.",
+      "A one-time $10 pass unlocks deep exploration — fly, guided tours, and rich paper detail — for any researcher you search, forever.",
+      "The home scientist stays wide open: no sign-in, no paywall, the whole galaxy free to roam.",
+      "Sponsor Cosmograph on GitHub right from the unlock panel to keep the lights on.",
+    ],
+  },
+  {
     version: "2.0.0",
     codename: "Open Universe",
     date: "2026-06-21",

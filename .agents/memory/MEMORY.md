@@ -9,3 +9,4 @@
 - [Brand — Cosmograph](brand-cosmograph.md) — app is Cosmograph/cosmograph.space (was Galactic); keep concept word "galaxy", presence term "cosmographers", repo + internal slug `galaxy` unchanged.
 - [Version bumping](version-bumping.md) — UI version = CHANGELOG[0].version (hand-written), not git-derived; prepend a changelog entry AND sync package.json when shipping features.
 - [Stripe unlock entitlement](stripe-entitlement-design.md) — $10 one-time unlock: derive has_paid from synced stripe.* tables + live confirm-on-redirect, not webhook-secret parsing; donations are GitHub Sponsors, not Stripe.
+- [Stripe + stripe-replit-sync setup](stripe-replit-sync-setup.md) — connector secret is `settings.secret` (not `secret_key`); externalize `stripe-replit-sync` from esbuild or runMigrations silently skips table creation (empty `stripe` schema).
