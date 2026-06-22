@@ -26,7 +26,7 @@ async function doRefresh(): Promise<void> {
   try {
     const res = await fetch(`https://api.github.com/repos/${REPO}`, {
       headers: {
-        "User-Agent": "galactic-app",
+        "User-Agent": "cosmograph-app",
         Accept: "application/vnd.github+json",
       },
     });

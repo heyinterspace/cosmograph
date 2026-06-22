@@ -17,15 +17,25 @@ export interface ChangelogEntry {
  */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "3.0.0",
+    codename: "Cosmograph",
+    date: "2026-06-22",
+    summary: "A new name for the voyage — Galactic is now Cosmograph.",
+    changes: [
+      "New identity: the app is now Cosmograph, charting any scientist's life in science at cosmograph.space.",
+      "The wordmark, share cards, footer, and live presence all fly the Cosmograph flag from bridge to bottom.",
+    ],
+  },
+  {
     version: "2.0.0",
     codename: "Open Universe",
     date: "2026-06-21",
     summary: "The galaxy opens to every scientist in the sky.",
     changes: [
       "Explore anyone: search a researcher by name and the whole galaxy re-forms around their life's work, charted live from OpenAlex.",
-      "Share this Galactic: capture your current view as a stat-laden card and copy it straight to the clipboard — no downloads, no detours.",
+      "Share this Cosmograph: capture your current view as a stat-laden card and copy it straight to the clipboard — no downloads, no detours.",
       "Bridge refit: Replay and Tour moved up beside Orbit and Fly, while Share and the GitHub beacon dropped into the command bar.",
-      "A new footer beacon spells out what Galactic is for every first-time arrival.",
+      "A new footer beacon spells out what Cosmograph is for every first-time arrival.",
     ],
   },
   {
@@ -55,7 +65,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-06-20",
     summary: "Tuned the antenna and caught signals from fellow travelers.",
     changes: [
-      "Live presence: faint wisps now mark other galacticons drifting through the same stars.",
+      "Live presence: faint wisps now mark other cosmographers drifting through the same stars.",
       "A headcount beacon shows how many explorers are streaming through the galaxy right now.",
       "Pulled GitHub starlight into the footer so you can see the constellation grow.",
     ],

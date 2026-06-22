@@ -228,7 +228,7 @@ export function ScrollIntro() {
               animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
               transition={{ duration: 1.8, ease: "easeOut" }}
             >
-              Galactic
+              Cosmograph
             </motion.h1>
             <motion.div
               initial={{ opacity: 0 }}

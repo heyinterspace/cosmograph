@@ -76,7 +76,7 @@ export function InfoDrawer() {
 
             <div className="space-y-4 text-[13px] leading-relaxed text-ink-dim">
               <p>
-                Galactic turns a scientist's lifetime of research into a universe you can fly
+                Cosmograph turns a scientist's lifetime of research into a universe you can fly
                 through. Every <span className="text-ink">sun</span> is a field they helped shape,
                 every <span className="text-ink">planet</span> a paper they published, and every{" "}
                 <span className="text-ink">moon</span> a collaborator who worked alongside them.
@@ -90,7 +90,7 @@ export function InfoDrawer() {
                 you to the people who spend their lives expanding what we know.
               </p>
               <p>
-                Galactic is open source and built for anyone. Point it at any researcher — a parent,
+                Cosmograph is open source and built for anyone. Point it at any researcher — a parent,
                 a mentor, or yourself — and it rebuilds the entire galaxy from public data on{" "}
                 <span className="text-ink">OpenAlex</span>. No identity is hardcoded; everything you
                 see is generated from a single data snapshot.
@@ -106,7 +106,7 @@ export function InfoDrawer() {
 
             <div className="mt-8 border-t-2 border-edge pt-6">
               <span className="font-mono text-[10px] uppercase tracking-widest text-accent">
-                The Hitchhiker's Guide to Galactic
+                The Hitchhiker's Guide to Cosmograph
               </span>
               <h3 className="mt-1 mb-4 text-lg font-title font-bold tracking-tight text-ink">
                 A lifetime of work, mapped to the stars

@@ -128,7 +128,7 @@ export async function buildShareCard(): Promise<Blob | null> {
   ctx.fillText("✦", PAD, 76);
   const star = ctx.measureText("✦").width;
   ctx.fillStyle = ink;
-  ctx.fillText("Galactic", PAD + star + 16, 76);
+  ctx.fillText("Cosmograph", PAD + star + 16, 76);
 
   // Kicker.
   ctx.font = `400 18px ${MONO_FONT}`;
@@ -227,14 +227,14 @@ export type NativeShareOutcome = "shared" | "cancelled" | "error";
 export async function nativeShareCard(blob: Blob): Promise<NativeShareOutcome> {
   const nav = typeof navigator !== "undefined" ? navigator : undefined;
   if (!nav || typeof nav.share !== "function") return "error";
-  const file = new File([blob], `galactic-${slugify(galaxyData.author.name)}.png`, {
+  const file = new File([blob], `cosmograph-${slugify(galaxyData.author.name)}.png`, {
     type: blob.type,
   });
   try {
     if (typeof nav.canShare === "function" && nav.canShare({ files: [file] })) {
-      await nav.share({ files: [file], title: "Galactic", text: getShareText(), url: getShareUrl() });
+      await nav.share({ files: [file], title: "Cosmograph", text: getShareText(), url: getShareUrl() });
     } else {
-      await nav.share({ title: "Galactic", text: getShareText(), url: getShareUrl() });
+      await nav.share({ title: "Cosmograph", text: getShareText(), url: getShareUrl() });
     }
     return "shared";
   } catch (e) {

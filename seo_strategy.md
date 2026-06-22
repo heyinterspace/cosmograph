@@ -14,7 +14,7 @@
 
 ## Primary keywords
 - Unknown — likely varies by the selected scientist and their research areas
-- Brand term: Galactic
+- Brand term: Cosmograph
 
 ## Dismissed categories
 - (None yet)

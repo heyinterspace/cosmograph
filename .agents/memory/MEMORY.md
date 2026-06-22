@@ -6,4 +6,6 @@
 - [Fly camera mode](fly-camera-mode.md) — first-person spaceship: dive-in on entry, OrbitControls unmounted, momentum velocity (clamp+delta-damp), never unbounded translate.
 - [Reusable identity](reusable-identity.md) — open-source template for ANY scientist: never hardcode name/pronoun/relationship; identity comes only from galaxyData; generator takes --name/--id.
 - [Intro flight camera](intro-flight-camera.md) — scroll intro drives the ONE live R3F camera via a ref (introProgressRef), not state, so per-frame progress doesn't re-render global consumers.
+- [Brand — Cosmograph](brand-cosmograph.md) — app is Cosmograph/cosmograph.space (was Galactic); keep concept word "galaxy", presence term "cosmographers", repo + internal slug `galaxy` unchanged.
 - [Version bumping](version-bumping.md) — UI version = CHANGELOG[0].version (hand-written), not git-derived; prepend a changelog entry AND sync package.json when shipping features.
+- [Stripe unlock entitlement](stripe-entitlement-design.md) — $10 one-time unlock: derive has_paid from synced stripe.* tables + live confirm-on-redirect, not webhook-secret parsing; donations are GitHub Sponsors, not Stripe.

@@ -1,7 +1,7 @@
 import { CURRENT_VERSION } from "@/data/changelog";
 
 export const SITE = {
-  domain: "galactic.dad",
+  domain: "cosmograph.space",
   version: CURRENT_VERSION,
   org: {
     name: "Interspace Venture",

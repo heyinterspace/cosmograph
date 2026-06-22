@@ -73,7 +73,7 @@ export function ResearcherSearch() {
 
       <p className="mt-3 text-[13px] leading-relaxed text-ink-dim">
         Type any researcher's name — a parent, a mentor, a hero, or yourself — and
-        Galactic rebuilds the entire universe from their public record on{" "}
+        Cosmograph rebuilds the entire universe from their public record on{" "}
         <span className="text-ink">OpenAlex</span>. No setup, nothing to install.
       </p>
 

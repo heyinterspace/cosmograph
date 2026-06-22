@@ -77,7 +77,7 @@ export function Cockpit({
         className="absolute inset-x-0 top-0 flex items-center justify-between px-6 py-3 text-[10px] uppercase tracking-[0.3em] text-ink-dim"
         style={{ borderBottom: `2px solid rgba(${ACCENT},0.5)` }}
       >
-        <span>Galactic · Flight Systems</span>
+        <span>Cosmograph · Flight Systems</span>
         <span className="hidden text-accent/80 sm:block">Ad Astra</span>
         <span>Nav · Online</span>
       </div>

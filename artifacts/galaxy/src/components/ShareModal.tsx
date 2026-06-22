@@ -128,7 +128,7 @@ export function ShareModal({ open, onClose }: { open: boolean; onClose: () => vo
               </button>
 
               <span className="font-mono text-[10px] uppercase tracking-widest text-accent">
-                Share this Galactic
+                Share this Cosmograph
               </span>
               <h2
                 id="share-modal-title"
@@ -141,7 +141,7 @@ export function ShareModal({ open, onClose }: { open: boolean; onClose: () => vo
                 {imageUrl ? (
                   <img
                     src={imageUrl}
-                    alt="Galactic share card preview"
+                    alt="Cosmograph share card preview"
                     className="h-full w-full object-cover"
                   />
                 ) : (

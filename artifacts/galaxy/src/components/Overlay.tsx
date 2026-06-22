@@ -85,7 +85,7 @@ function Header() {
   const { stats } = galaxyData;
   return (
     <div className="absolute top-0 left-0 p-6">
-      <h1 className="pointer-events-none text-3xl font-title font-bold tracking-tight text-ink">Galactic</h1>
+      <h1 className="pointer-events-none text-3xl font-title font-bold tracking-tight text-ink">Cosmograph</h1>
       <p className="pointer-events-none text-ink-dim font-mono text-[11px] mt-1 uppercase tracking-widest">
         A Journey of Scientific Exploration · {galaxyData.author.name}
       </p>
@@ -123,7 +123,7 @@ function LivePresence() {
         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75" />
         <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-accent" />
       </span>
-      <span className="text-ink">{count}</span> galacticon{count === 1 ? "" : "s"} streaming now
+      <span className="text-ink">{count}</span> cosmographer{count === 1 ? "" : "s"} streaming now
     </div>
   );
 }

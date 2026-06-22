@@ -65,7 +65,7 @@ interface AppState {
 
 const AppStateContext = createContext<AppState | undefined>(undefined);
 
-const INTRO_SEEN_KEY = 'galactic:introSeen';
+const INTRO_SEEN_KEY = 'cosmograph:introSeen';
 
 function readIntroSeen(): boolean {
   try {
