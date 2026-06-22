@@ -16,7 +16,11 @@ function formatStardate(iso: string): string {
 }
 
 export function ChangelogDrawer() {
-  const { changelogOpen, setChangelogOpen } = useAppState();
+  const { changelogOpen, setChangelogOpen, consoleOpen } = useAppState();
+  // Sit to the LEFT of the right-hand Flight Console instead of under it: offset
+  // by the live console width (expanded vs collapsed rail) and cap our own width
+  // so we never overflow the remaining space.
+  const consoleW = consoleOpen ? "min(14rem,80vw)" : "3.5rem";
 
   useEffect(() => {
     if (!changelogOpen) return;
@@ -48,7 +52,11 @@ export function ChangelogDrawer() {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", stiffness: 320, damping: 34 }}
-            className="custom-scrollbar absolute right-0 top-0 bottom-0 w-[min(34rem,92vw)] overflow-y-auto border-l-2 border-edge bg-bg/95 p-7 backdrop-blur-xl"
+            style={{
+              right: consoleW,
+              width: `min(34rem, calc(100vw - ${consoleW} - 0.5rem))`,
+            }}
+            className="custom-scrollbar absolute top-0 bottom-0 overflow-y-auto border-l-2 border-edge bg-bg/95 p-7 backdrop-blur-xl"
           >
             <button
               onClick={() => setChangelogOpen(false)}
