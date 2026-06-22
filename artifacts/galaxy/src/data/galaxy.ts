@@ -118,24 +118,34 @@ export interface Filters {
   minCitations: number;
 }
 
-export const defaultFilters: Filters = {
-  minYear: null,
-  maxYear: null,
-  domainIds: [],
-  minCitations: 0,
-};
+// Default = every domain selected (explicit "all on"). Computed from the live
+// galaxyData so a dataset swap yields the new scientist's domain ids, not stale ones.
+export function makeDefaultFilters(): Filters {
+  return {
+    minYear: null,
+    maxYear: null,
+    domainIds: galaxyData.domains.map((d) => d.id),
+    minCitations: 0,
+  };
+}
 
 export function isFiltersActive(f: Filters): boolean {
+  // Domains count as filtered unless every current domain is selected. Using
+  // set-containment (not length) keeps this correct even if domainIds ever holds
+  // a stale/duplicate id that coincidentally matches the domain count.
+  const allDomainsSelected = galaxyData.domains.every((d) =>
+    f.domainIds.includes(d.id),
+  );
   return (
     f.minYear != null ||
     f.maxYear != null ||
-    f.domainIds.length > 0 ||
+    !allDomainsSelected ||
     f.minCitations > 0
   );
 }
 
 export function paperMatchesFilters(p: Paper, f: Filters): boolean {
-  if (f.domainIds.length > 0 && !f.domainIds.includes(p.domainId)) return false;
+  if (!f.domainIds.includes(p.domainId)) return false;
   if (f.minCitations > 0 && p.citations < f.minCitations) return false;
   if (f.minYear != null && (p.year == null || p.year < f.minYear)) return false;
   if (f.maxYear != null && (p.year == null || p.year > f.maxYear)) return false;

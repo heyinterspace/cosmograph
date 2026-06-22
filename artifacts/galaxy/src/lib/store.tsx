@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useRef, ReactNode } from 'react';
-import { Filters, defaultFilters, applyDataset, galaxyData } from '@/data/galaxy';
+import { Filters, makeDefaultFilters, applyDataset, galaxyData } from '@/data/galaxy';
 import { buildGalaxyData } from '@/data/buildGalaxy';
 import { fetchAuthor, fetchAuthorWorks, type AuthorCandidate } from '@/lib/openalex';
 import { rebuildLayout } from '@/components/GalaxySystem';
@@ -130,14 +130,14 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [hoveredObject, setHoveredObject] = useState<HoveredObject>(null);
   const [searchActive, setSearchActive] = useState<boolean>(false);
   const [galaxyTilt, setGalaxyTilt] = useState<number>(0);
-  const [filters, setFiltersState] = useState<Filters>(defaultFilters);
+  const [filters, setFiltersState] = useState<Filters>(makeDefaultFilters);
 
   const setFilters = useCallback((patch: Partial<Filters>) => {
     setFiltersState((prev) => ({ ...prev, ...patch }));
   }, []);
 
   const resetFilters = useCallback(() => {
-    setFiltersState(defaultFilters);
+    setFiltersState(makeDefaultFilters());
   }, []);
 
   const [tourActive, setTourActive] = useState(false);
@@ -178,7 +178,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       setTourActive(false);
       setTourStopIndex(0);
       setCameraMode('god');
-      setFiltersState(defaultFilters);
+      setFiltersState(makeDefaultFilters());
       setActiveAuthorLabel(data.author.name);
       setDatasetVersion((v) => v + 1);
       setDatasetStatus('ready');

@@ -159,9 +159,13 @@ export function Sidebar() {
     else next.add(id);
     setFilters({ domainIds: [...next] });
   };
-  const selectedDomainLabel =
-    filters.domainIds.length === 0
-      ? "All domains"
+  const allDomainsSelected = galaxyData.domains.every((d) =>
+    filters.domainIds.includes(d.id),
+  );
+  const selectedDomainLabel = allDomainsSelected
+    ? "All domains"
+    : filters.domainIds.length === 0
+      ? "No domains"
       : filters.domainIds.length === 1
         ? (domainNameById[filters.domainIds[0]] ?? "1 selected")
         : `${filters.domainIds.length} domains`;
@@ -399,8 +403,14 @@ export function Sidebar() {
                     {domainMenuOpen && (
                       <div className="mt-1 max-h-[16rem] overflow-y-auto custom-scrollbar border-2 border-edge bg-white/5">
                         <DomainOption
-                          checked={filters.domainIds.length === 0}
-                          onClick={() => setFilters({ domainIds: [] })}
+                          checked={allDomainsSelected}
+                          onClick={() =>
+                            setFilters({
+                              domainIds: allDomainsSelected
+                                ? []
+                                : galaxyData.domains.map((d) => d.id),
+                            })
+                          }
                         >
                           All domains
                         </DomainOption>
