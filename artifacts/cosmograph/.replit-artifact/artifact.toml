@@ -1,6 +1,6 @@
 kind = "web"
 previewPath = "/"
-title = "Galactic"
+title = "Cosmograph"
 version = "1.0.0"
 id = "artifacts/galaxy"
 router = "path"
@@ -15,11 +15,11 @@ paths = [ "/" ]
 localPort = 23665
 
 [services.development]
-run = "pnpm --filter @workspace/galaxy run dev"
+run = "pnpm --filter @workspace/cosmograph run dev"
 
 [services.production]
-build = [ "pnpm", "--filter", "@workspace/galaxy", "run", "build" ]
-publicDir = "artifacts/galaxy/dist/public"
+build = [ "pnpm", "--filter", "@workspace/cosmograph", "run", "build" ]
+publicDir = "artifacts/cosmograph/dist/public"
 serve = "static"
 
 [[services.production.rewrites]]

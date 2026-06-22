@@ -1,12 +1,12 @@
 # Cosmograph
 
-An immersive 3D website (cosmograph.space) that visualizes the lifetime scientific work of any researcher as an explorable galaxy — research domains as suns, papers as orbiting planets, co-authors as moons. Originally built as a Father's Day gift for Dr. Mahendra S. Rao, it is now a reusable, open-source template: point it at any scientist (a dad, a mom, a mentor, yourself) and regenerate the data snapshot. The app ships with **no hardcoded identity** — everything the UI shows comes from the generated snapshot. (Internal package/slug remains `galaxy`.)
+An immersive 3D website (cosmograph.space) that visualizes the lifetime scientific work of any researcher as an explorable galaxy — research domains as suns, papers as orbiting planets, co-authors as moons. Originally built as a Father's Day gift for Dr. Mahendra S. Rao, it is now a reusable, open-source template: point it at any scientist (a dad, a mom, a mentor, yourself) and regenerate the data snapshot. The app ships with **no hardcoded identity** — everything the UI shows comes from the generated snapshot.
 
 ## Make it for your own scientist
 
 1. Regenerate the snapshot for the person you want (by name or OpenAlex author ID):
-   - `pnpm --filter @workspace/galaxy run fetch:galaxy -- --name "Ada Lovelace" > artifacts/galaxy/src/data/galaxyData.json`
-   - or `... -- --id A5111365293 > artifacts/galaxy/src/data/galaxyData.json`
+   - `pnpm --filter @workspace/cosmograph run fetch:galaxy -- --name "Ada Lovelace" > artifacts/cosmograph/src/data/galaxyData.json`
+   - or `... -- --id A5111365293 > artifacts/cosmograph/src/data/galaxyData.json`
    - Tip: name search prints the top OpenAlex matches to stderr; if it picks the wrong person, re-run with the correct `--id`.
 2. That's it — restart the `galaxy` workflow. The title, stats, domains, papers, and co-authors all redraw from the new snapshot.
 
@@ -22,12 +22,12 @@ OpenAlex sometimes lumps two distinct scientists who share a name under one auth
 The shipped snapshot for **Mahendra S. Rao** uses this — profile `A5111365293` merged a Northwestern carcinogenesis/peroxisome researcher (Janardan K. Reddy's lab) with the real stem-cell scientist. The exact command that produced the current snapshot:
 
 ```
-pnpm --filter @workspace/galaxy run fetch:galaxy -- \
+pnpm --filter @workspace/cosmograph run fetch:galaxy -- \
   --id A5111365293 \
   --exclude-institution I111979921 \
   --exclude-coauthor A5034754078 \
   --min-year 1994 \
-  > artifacts/galaxy/src/data/galaxyData.json
+  > artifacts/cosmograph/src/data/galaxyData.json
 ```
 
 Disambiguate by research cluster (institution + co-author), **not** by year alone — the wrong person here published into the 2000s, so a plain year cutoff would not separate them.
@@ -60,10 +60,10 @@ Disambiguate by research cluster (institution + co-author), **not** by year alon
 
 ## Where things live
 
-- `artifacts/galaxy/` — the Galaxy web app (React + Vite + React Three Fiber). Served at `/`.
-- `artifacts/galaxy/src/data/galaxyData.json` — the baked-in data snapshot (source of truth for the visualization).
-- `artifacts/galaxy/src/data/galaxy.ts` — typed accessors over the snapshot.
-- `artifacts/galaxy/scripts/fetch-galaxy.mjs` — one-time script that regenerates the snapshot from OpenAlex.
+- `artifacts/cosmograph/` — the Galaxy web app (React + Vite + React Three Fiber). Served at `/`.
+- `artifacts/cosmograph/src/data/galaxyData.json` — the baked-in data snapshot (source of truth for the visualization).
+- `artifacts/cosmograph/src/data/galaxy.ts` — typed accessors over the snapshot.
+- `artifacts/cosmograph/scripts/fetch-galaxy.mjs` — one-time script that regenerates the snapshot from OpenAlex.
 
 ## Architecture decisions
 
@@ -89,6 +89,7 @@ _Populate as you build — explicit user instructions worth remembering across s
 - **Presence wisps live inside the tilt frame.** Peers send camera positions in galaxy-*local* space (the broadcaster un-rotates by `-galaxyTilt` about X before sending), and `PresenceWisps` re-applies `rotation-x={galaxyTilt}` so wisps line up with the orbiting planets for each viewer. Skip either half and wisps drift off the disk.
 - **`api-server` must be always-on for presence.** Don't deploy it as static/scale-to-zero — the WebSocket needs a persistent process. The galaxy bundle stays static.
 - **One remaining `pnpm audit` LOW is intentional:** esbuild `0.27.3` (Windows-only dev-server file read, GHSA-g7r4-m6w7-qqqr). It's a build tool not shipped in production and bumping to 0.28.x risks a Vite↔esbuild range mismatch. Leave it pinned.
+- **Artifact `id` intentionally stays `artifacts/galaxy`.** The web app's folder/package were renamed `galaxy`→`cosmograph`, but the artifact `id` in `artifacts/cosmograph/.replit-artifact/artifact.toml` remains `artifacts/galaxy` because `verifyAndReplaceArtifactToml` rejects id changes (`INVALID_ARTIFACT_ID`). It's an internal, never-user-visible handle; everything else (dir, `@workspace/cosmograph`, build/publicDir, workflow) points at `cosmograph`. Don't "fix" the id mismatch unless the platform adds id migration.
 - **Known doc gaps (not blockers):** repo has no `LICENSE` file despite being described as open-source, and `scripts/fetch-galaxy.mjs` still uses a placeholder OpenAlex `mailto`. Add a license and a real contact email before a public launch.
 
 ## Pointers

@@ -6,7 +6,7 @@
 
 ## Out of scope
 - Authenticated dashboards and admin pages (none identified in this app)
-- Internal development artifacts outside `artifacts/galaxy`
+- Internal development artifacts outside `artifacts/cosmograph`
 
 ## Target audience
 - People searching for a scientist's body of work
