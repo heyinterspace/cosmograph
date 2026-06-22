@@ -12,6 +12,8 @@ import {
   Compass,
   Rewind,
   Map,
+  Navigation,
+  Share2,
   ChevronRight,
   ChevronLeft,
   ChevronDown,
@@ -207,7 +209,7 @@ export function Sidebar() {
             <div className="flex flex-col gap-4 overflow-y-auto custom-scrollbar p-3">
               {/* Share */}
               <div className="flex flex-col gap-2">
-                <SectionLabel>Share</SectionLabel>
+                <SectionLabel icon={<Share2 size={15} />}>Share</SectionLabel>
                 <div className="flex flex-col gap-1.5">
                   <GitHubLink full />
                   <ShareButton full />
@@ -216,7 +218,7 @@ export function Sidebar() {
 
               {/* Navigate */}
               <div className="flex flex-col gap-1.5 border-t-2 border-edge pt-3">
-                <SectionLabel>Navigate</SectionLabel>
+                <SectionLabel icon={<Navigation size={15} />}>Navigate</SectionLabel>
                 <ConsoleButton
                   onClick={() => setInfoOpen(true)}
                   icon={<Info size={14} />}
@@ -249,13 +251,16 @@ export function Sidebar() {
               {/* Filter */}
               <div className="flex flex-col gap-3 border-t-2 border-edge pt-3">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="flex items-center gap-2">
-                    <Filter
-                      size={13}
-                      className={filtersActive ? "text-accent" : "text-ink-dim"}
-                    />
-                    <SectionLabel>Filter</SectionLabel>
-                  </span>
+                  <SectionLabel
+                    icon={
+                      <Filter
+                        size={15}
+                        className={filtersActive ? "text-accent" : "text-ink-dim"}
+                      />
+                    }
+                  >
+                    Filter
+                  </SectionLabel>
                   <span
                     className={`font-mono text-[11px] ${filtersActive ? "text-accent" : "text-ink-dim"}`}
                   >
@@ -541,9 +546,18 @@ export function Sidebar() {
   );
 }
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
+function SectionLabel({
+  children,
+  icon,
+}: {
+  children: React.ReactNode;
+  icon?: React.ReactNode;
+}) {
   return (
-    <span className="font-mono text-[10px] uppercase tracking-widest text-ink-dim">{children}</span>
+    <span className="flex items-center gap-2 font-mono text-[13px] uppercase tracking-widest text-ink-dim">
+      {icon}
+      {children}
+    </span>
   );
 }
 
