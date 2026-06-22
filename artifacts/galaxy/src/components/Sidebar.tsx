@@ -329,7 +329,7 @@ export function Sidebar() {
                     className={`w-16 ${numInputCls}`}
                   />
                   <span className="font-mono text-[11px] uppercase tracking-widest text-ink-dim">
-                    Citations
+                    Min citations
                   </span>
                 </div>
 
