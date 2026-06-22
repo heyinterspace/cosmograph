@@ -57,9 +57,8 @@ export function Sidebar() {
   } = useAppState();
 
   const [query, setQuery] = useState("");
-  const [domainMenuOpen, setDomainMenuOpen] = useState(false);
+  const [domainMenuOpen, setDomainMenuOpen] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
-  const domainMenuRef = useRef<HTMLDivElement>(null);
   const focusOnOpen = useRef(false);
 
   // Built from live galaxyData at mount; the whole Sidebar remounts on a dataset
@@ -136,18 +135,6 @@ export function Sidebar() {
       focusOnOpen.current = false;
     }
   }, [open]);
-
-  // Close the domain menu on outside click so the overlay doesn't linger.
-  useEffect(() => {
-    if (!domainMenuOpen) return;
-    const onDown = (e: PointerEvent) => {
-      if (domainMenuRef.current && !domainMenuRef.current.contains(e.target as Node)) {
-        setDomainMenuOpen(false);
-      }
-    };
-    document.addEventListener("pointerdown", onDown);
-    return () => document.removeEventListener("pointerdown", onDown);
-  }, [domainMenuOpen]);
 
   const pick = (r: SearchResult) => {
     setCameraMode("god");
@@ -389,7 +376,7 @@ export function Sidebar() {
                   <span className="mb-1.5 block font-mono text-[11px] uppercase tracking-widest text-ink-dim">
                     Domain
                   </span>
-                  <div className="relative" ref={domainMenuRef}>
+                  <div>
                     <button
                       type="button"
                       onClick={() => setDomainMenuOpen((o) => !o)}
@@ -405,7 +392,7 @@ export function Sidebar() {
                       />
                     </button>
                     {domainMenuOpen && (
-                      <div className="absolute left-0 right-0 top-full z-40 mt-1 max-h-[11rem] overflow-y-auto custom-scrollbar border-2 border-edge bg-[#06060e]/95 shadow-xl backdrop-blur-sm">
+                      <div className="mt-1 max-h-[16rem] overflow-y-auto custom-scrollbar border-2 border-edge bg-white/5">
                         <DomainOption
                           checked={filters.domainIds.length === 0}
                           onClick={() => setFilters({ domainIds: [] })}
