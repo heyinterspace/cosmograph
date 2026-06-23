@@ -117,7 +117,7 @@ export function Sidebar() {
                         className={filtersActive ? "text-accent" : undefined}
                       />
                     }
-                    label="Ask"
+                    label="Ask Cosmos"
                   />
                   <a
                     href={SITE.github.sponsors}

@@ -91,7 +91,7 @@ export function AskDrawer() {
             </button>
 
             <span className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-accent">
-              <MessageCircleStar size={12} /> Ask the galaxy
+              <MessageCircleStar size={12} /> Ask Cosmos
             </span>
             <h2
               id="ask-drawer-title"
