@@ -17,6 +17,15 @@ export interface ChangelogEntry {
  */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "3.8.0",
+    codename: "Celestial Globe",
+    date: "2026-06-23",
+    summary: "A new logo — a celestial globe with an AI star at its core.",
+    changes: [
+      "New brand mark: a lat/long graticule globe with a generated-star spark at the center, now in the header, the browser tab, and the sign-in screen.",
+    ],
+  },
+  {
     version: "3.7.0",
     codename: "Control Tower",
     date: "2026-06-23",

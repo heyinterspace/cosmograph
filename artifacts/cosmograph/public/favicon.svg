@@ -1,3 +1,21 @@
-<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="180" height="180" rx="36" fill="#FF3C00"/>
+<svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="80" height="80" rx="18" fill="#0a0a14"/>
+  <defs>
+    <mask id="cg-clear-fav">
+      <rect x="8" y="8" width="64" height="64" fill="white"/>
+      <circle cx="40" cy="40" r="10" fill="black"/>
+    </mask>
+  </defs>
+  <g transform="translate(8 8)">
+    <g mask="url(#cg-clear-fav)" stroke="#a388ee" fill="none" stroke-width="1.8" stroke-linecap="round">
+      <ellipse cx="32" cy="32" rx="26" ry="7.8"/>
+      <ellipse cx="32" cy="18" rx="21.5" ry="6"/>
+      <ellipse cx="32" cy="46" rx="21.5" ry="6"/>
+      <line x1="32" y1="6" x2="32" y2="58"/>
+      <ellipse cx="32" cy="32" rx="9.5" ry="26"/>
+      <ellipse cx="32" cy="32" rx="19" ry="26"/>
+    </g>
+    <circle cx="32" cy="32" r="26" stroke="#a388ee" stroke-width="2.4" fill="none"/>
+    <path d="M32 22.5 C32.8 28.9 35.1 31.2 41.5 32 C35.1 32.8 32.8 35.1 32 41.5 C31.2 35.1 28.9 32.8 22.5 32 C28.9 31.2 31.2 28.9 32 22.5 Z" fill="#cbbcf3"/>
+  </g>
 </svg>

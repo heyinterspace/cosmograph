@@ -87,7 +87,15 @@ function Header() {
   const { stats } = galaxyData;
   return (
     <div className="absolute top-0 left-0 p-6">
-      <h1 className="pointer-events-none text-3xl font-title font-bold tracking-tight text-ink">Cosmograph</h1>
+      <div className="flex items-center gap-2.5">
+        <img
+          src={`${import.meta.env.BASE_URL}logo-mark.svg`}
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none h-8 w-8"
+        />
+        <h1 className="pointer-events-none text-3xl font-title font-bold tracking-tight text-ink">Cosmograph</h1>
+      </div>
       <p className="pointer-events-none text-ink-dim font-mono text-[11px] mt-1 uppercase tracking-widest">
         A Journey of Scientific Exploration · {galaxyData.author.name}
       </p>
