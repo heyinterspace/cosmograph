@@ -108,6 +108,17 @@ export function Sidebar() {
                     icon={<Rocket size={14} />}
                     label="Changelog"
                   />
+                  <ConsoleButton
+                    active={filtersActive}
+                    onClick={() => setAskOpen(true)}
+                    icon={
+                      <MessageCircleStar
+                        size={14}
+                        className={filtersActive ? "text-accent" : undefined}
+                      />
+                    }
+                    label="Ask"
+                  />
                   <a
                     href={SITE.github.sponsors}
                     target="_blank"
@@ -124,17 +135,6 @@ export function Sidebar() {
                       className="ml-auto shrink-0 text-white/70"
                     />
                   </a>
-                  <ConsoleButton
-                    active={filtersActive}
-                    onClick={() => setAskOpen(true)}
-                    icon={
-                      <MessageCircleStar
-                        size={14}
-                        className={filtersActive ? "text-accent" : undefined}
-                      />
-                    }
-                    label="Ask"
-                  />
 
                   {/* Personalize — paid */}
                   <Tooltip>
