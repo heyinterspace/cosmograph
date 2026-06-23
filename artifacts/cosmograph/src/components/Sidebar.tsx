@@ -1,7 +1,6 @@
-import { useMemo, useRef, useState } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  X,
   Info,
   Orbit,
   Compass,
@@ -12,31 +11,16 @@ import {
   ChevronRight,
   ChevronLeft,
   ChevronDown,
-  Sparkles,
   Heart,
   Lock,
-  SendHorizontal,
-  Loader2,
-  Bug,
-  Lightbulb,
   ExternalLink,
   LayoutGrid,
   Rocket,
   Telescope,
   Crown,
 } from "lucide-react";
-import { useTranslateAsk, useReportFeedback } from "@workspace/api-client-react";
 import { useAppState } from "@/lib/store";
-import {
-  galaxyData,
-  isFiltersActive,
-  countMatchingPapers,
-  runAskQuery,
-  type AskQuery,
-  type AskResult,
-  type Paper,
-} from "@/data/galaxy";
-import { getDomainColorStr } from "@/lib/colors";
+import { isFiltersActive } from "@/data/galaxy";
 import { SITE } from "@/config/site";
 import { ShareButton } from "./ShareButton";
 import { GitHubLink } from "./GitHubLink";
@@ -53,9 +37,9 @@ export function Sidebar() {
   const {
     setCameraMode,
     cameraMode,
-    setSelectedObject,
     filters,
     setInfoOpen,
+    setAskOpen,
     setChangelogOpen,
     setCustomizeOpen,
     replayIntro,
@@ -67,35 +51,7 @@ export function Sidebar() {
 
   const { openSections, toggleSection } = useSectionState();
 
-  // Built from live galaxyData at mount; the whole Sidebar remounts on a dataset
-  // swap (key={datasetVersion}), so these stay in sync with the active scientist.
-  const domainIndexById = useMemo<Record<string, number>>(
-    () =>
-      galaxyData.domains.reduce(
-        (acc, d, i) => {
-          acc[d.id] = i;
-          return acc;
-        },
-        {} as Record<string, number>,
-      ),
-    [],
-  );
-
   const filtersActive = isFiltersActive(filters);
-  const totalPapers = galaxyData.papers.length;
-  const matchCount = useMemo(
-    () => (filtersActive ? countMatchingPapers(filters) : totalPapers),
-    [filters, filtersActive, totalPapers],
-  );
-
-  const pickPaper = (id: string) => {
-    setCameraMode("god");
-    setSelectedObject({ type: "planet", id });
-  };
-
-  const expandWithAsk = () => {
-    setOpen(true);
-  };
 
   return (
     <TooltipProvider delayDuration={150} skipDelayDuration={400}>
@@ -131,11 +87,22 @@ export function Sidebar() {
 
             {/* Scroll body */}
             <div className="flex flex-col gap-4 overflow-y-auto custom-scrollbar p-3">
-              {/* Info, then Sign in — pinned at the top, no section wrapper */}
+              {/* Info, Ask, then Sign in — pinned at the top, no section wrapper */}
               <ConsoleButton
                 onClick={() => setInfoOpen(true)}
                 icon={<Info size={14} />}
                 label="Info"
+              />
+              <ConsoleButton
+                active={filtersActive}
+                onClick={() => setAskOpen(true)}
+                icon={
+                  <MessageCircleStar
+                    size={14}
+                    className={filtersActive ? "text-accent" : undefined}
+                  />
+                }
+                label="Ask"
               />
               <AccountIndicator />
 
@@ -238,28 +205,6 @@ export function Sidebar() {
                   />
                 </div>
               </CollapsibleSection>
-
-              {/* Ask the galaxy */}
-              <CollapsibleSection
-                icon={
-                  <MessageCircleStar
-                    size={15}
-                    className={filtersActive ? "text-accent" : "text-ink-dim"}
-                  />
-                }
-                title="Ask"
-                isOpen={openSections.ask}
-                onToggle={() => toggleSection("ask")}
-                right={
-                  filtersActive ? (
-                    <span className="font-mono text-[11px] text-accent">
-                      {matchCount}/{totalPapers}
-                    </span>
-                  ) : undefined
-                }
-              >
-                <AskPanel domainIndexById={domainIndexById} onPickPaper={pickPaper} />
-              </CollapsibleSection>
             </div>
           </motion.div>
         ) : (
@@ -276,9 +221,15 @@ export function Sidebar() {
               <ChevronLeft size={16} />
             </RailButton>
             <Divider />
-            {/* Info + Profile */}
+            {/* Info + Ask + Profile */}
             <RailButton onClick={() => setInfoOpen(true)} label="Info">
               <Info size={16} />
+            </RailButton>
+            <RailButton active={filtersActive} onClick={() => setAskOpen(true)} label="Ask">
+              <MessageCircleStar size={15} />
+              {filtersActive && (
+                <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-accent ring-2 ring-black" />
+              )}
             </RailButton>
             <AccountIndicatorRail />
             <Divider />
@@ -335,14 +286,6 @@ export function Sidebar() {
             <RailButton onClick={replayIntro} label="Replay">
               <Rewind size={16} />
             </RailButton>
-            <Divider />
-            {/* Ask */}
-            <RailButton active={filtersActive} onClick={expandWithAsk} label="Ask">
-              <MessageCircleStar size={15} />
-              {filtersActive && (
-                <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-accent ring-2 ring-black" />
-              )}
-            </RailButton>
           </motion.div>
         )}
       </AnimatePresence>
@@ -351,14 +294,13 @@ export function Sidebar() {
   );
 }
 
-type SectionKey = "customize" | "share" | "navigate" | "ask" | "platform";
+type SectionKey = "customize" | "share" | "navigate" | "platform";
 
 const SECTION_STORAGE_KEY = "galaxy.console.sections";
 const DEFAULT_SECTIONS: Record<SectionKey, boolean> = {
   customize: true,
   share: true,
   navigate: true,
-  ask: true,
   platform: true,
 };
 
@@ -548,324 +490,4 @@ function RailButton({
 
 function Divider() {
   return <div className="my-0.5 h-px w-6 bg-edge/60" />;
-}
-
-// The paper-record shape sent to the translator. Field names + types only —
-// never any actual paper data (everything stays local in the browser).
-const ASK_FIELDS = [
-  { name: "title", type: "string" },
-  { name: "year", type: "number", description: "Publication year." },
-  { name: "citations", type: "number", description: "Total citation count." },
-  { name: "topic", type: "string", description: "Fine-grained OpenAlex topic." },
-  { name: "subfield", type: "string" },
-  { name: "field", type: "string" },
-  { name: "domainName", type: "string", description: "The research domain (sun) this paper orbits." },
-  { name: "venue", type: "string", description: "Journal or conference." },
-  { name: "coAuthors", type: "string[]", description: "Names of collaborators." },
-  { name: "coAuthorCount", type: "number", description: "Number of collaborators." },
-] as const;
-
-type AskMode = "ask" | "bug" | "feature";
-
-// A single conversation turn. For "ask" turns the answer + papers are computed
-// deterministically by runAskQuery (the model never returns numbers or lists).
-// For "bug"/"feature" turns the translator detected feedback, the message was
-// filed to Linear, and the turn carries the resulting issue link.
-interface AskTurn {
-  id: number;
-  mode: AskMode;
-  question: string;
-  status: "ok" | "unsupported" | "error";
-  answer: string;
-  papers: Paper[];
-  count: number;
-  issueUrl?: string;
-  issueNumber?: number;
-}
-
-// Compose the answer text from the locally-computed result. ALL numbers here
-// come from `r` (the deterministic run), not from the model.
-function composeAnswer(q: AskQuery, r: AskResult): string {
-  if (q.unsupported) {
-    return "I can only answer questions about this scientist's papers — try topics, years, citation counts, or co-authors. Spotted a bug or have an idea? Just say so (e.g. “I want to report a bug…”) and I'll file it with the team.";
-  }
-  if (r.count === 0) {
-    return `No papers match that — searched all ${r.total}.`;
-  }
-  if (q.intent === "count") {
-    return `${r.count} of ${r.total} papers match — they're lit up in the galaxy.`;
-  }
-  const shown = r.matched.length;
-  const noun = r.count === 1 ? "paper" : "papers";
-  if (shown < r.count) {
-    return `${r.count} ${noun} match — showing the top ${shown}, lit up in the galaxy.`;
-  }
-  return `${r.count} ${noun} match — lit up in the galaxy.`;
-}
-
-function AskPanel({
-  domainIndexById,
-  onPickPaper,
-}: {
-  domainIndexById: Record<string, number>;
-  onPickPaper: (id: string) => void;
-}) {
-  const { setFilters, resetFilters } = useAppState();
-  const [input, setInput] = useState("");
-  const [turns, setTurns] = useState<AskTurn[]>([]);
-  const turnId = useRef(0);
-  const translate = useTranslateAsk();
-  const report = useReportFeedback();
-
-  const domainNames = useMemo(() => galaxyData.domains.map((d) => d.name), []);
-  const busy = translate.isPending || report.isPending;
-
-  // File a translator-detected bug report / feature request to Linear, then
-  // append a turn linking the created issue.
-  const fileFeedback = async (
-    kind: "bug" | "feature",
-    message: string,
-    id: number,
-  ) => {
-    try {
-      const issue = await report.mutateAsync({ data: { kind, message } });
-      setTurns((prev) => [
-        ...prev,
-        {
-          id,
-          mode: kind,
-          question: message,
-          status: "ok",
-          answer:
-            kind === "bug"
-              ? "Thanks — I filed that as a bug report. The team will take a look."
-              : "Thanks — I filed that as a feature request. The team will take a look.",
-          papers: [],
-          count: 0,
-          issueUrl: issue.url,
-          issueNumber: issue.number,
-        },
-      ]);
-    } catch {
-      setTurns((prev) => [
-        ...prev,
-        {
-          id,
-          mode: kind,
-          question: message,
-          status: "error",
-          answer: "Couldn't file that just now. Please try again later.",
-          papers: [],
-          count: 0,
-        },
-      ]);
-    }
-  };
-
-  // One input does it all: translate → if the translator detected a bug/feature
-  // report, file it to Linear; otherwise run the deterministic query + light up
-  // matches.
-  const ask = async (question: string, id: number) => {
-    try {
-      const spec = await translate.mutateAsync({
-        data: { question, fields: [...ASK_FIELDS], domains: domainNames },
-      });
-      if (spec.intent === "feedback") {
-        await fileFeedback(spec.feedbackKind ?? "bug", question, id);
-        return;
-      }
-      const result = runAskQuery(spec);
-      if (spec.unsupported) resetFilters();
-      else setFilters(result.filters);
-      setTurns((prev) => [
-        ...prev,
-        {
-          id,
-          mode: "ask",
-          question,
-          status: spec.unsupported ? "unsupported" : "ok",
-          answer: composeAnswer(spec, result),
-          papers: result.matched,
-          count: result.count,
-        },
-      ]);
-    } catch {
-      setTurns((prev) => [
-        ...prev,
-        {
-          id,
-          mode: "ask",
-          question,
-          status: "error",
-          answer: "Couldn't reach the translator just now. Please try again.",
-          papers: [],
-          count: 0,
-        },
-      ]);
-    }
-  };
-
-  const submit = (raw: string) => {
-    const text = raw.trim();
-    if (!text || busy) return;
-    setInput("");
-    const id = ++turnId.current;
-    void ask(text, id);
-  };
-
-  const send = () => submit(input);
-
-  const clear = () => {
-    setTurns([]);
-    resetFilters();
-  };
-
-  // Starter prompts shown before the first question — one is seeded from the
-  // active scientist's top research domain so it stays relevant after a swap.
-  const suggestions = useMemo(() => {
-    const chips = ["Most cited papers", "Papers since 2015", "Over 100 citations"];
-    const topDomain = galaxyData.domains[0]?.name;
-    if (topDomain) chips.splice(1, 0, `Work on ${topDomain}`);
-    return chips;
-  }, []);
-
-  return (
-    <div className="flex flex-col gap-3">
-
-      {/* Input */}
-      <div className="flex items-center gap-2 border-2 border-edge bg-white/5 px-2 focus-within:border-accent">
-        <Sparkles size={15} className="shrink-0 text-accent" />
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") send();
-          }}
-          placeholder="Ask about this work, or report a bug…"
-          className="min-w-0 flex-1 bg-transparent py-2 text-sm text-ink placeholder:text-ink-dim/70 focus:outline-none"
-        />
-        <button
-          onClick={send}
-          disabled={!input.trim() || busy}
-          aria-label="Send"
-          className="shrink-0 text-ink-dim transition-colors hover:text-accent disabled:opacity-40"
-        >
-          {busy ? (
-            <Loader2 size={16} className="animate-spin" />
-          ) : (
-            <SendHorizontal size={16} />
-          )}
-        </button>
-      </div>
-
-      {turns.length === 0 ? (
-        <div className="flex flex-col gap-2 px-0.5">
-          <span className="font-mono text-[10px] uppercase tracking-widest text-ink-dim">
-            Try asking
-          </span>
-          <div className="flex flex-wrap gap-1.5">
-            {suggestions.map((s) => (
-              <button
-                key={s}
-                onClick={() => submit(s)}
-                disabled={busy}
-                className="border-2 border-edge bg-white/5 px-2.5 py-1 text-[11px] text-ink-dim transition-colors hover:border-accent hover:text-ink disabled:opacity-40"
-              >
-                {s}
-              </button>
-            ))}
-          </div>
-          <span className="text-[10px] leading-relaxed text-ink-dim/70">
-            Answers are computed from the data, never invented. You can also report
-            a bug or request a feature here.
-          </span>
-        </div>
-      ) : (
-        <div className="flex items-center justify-between">
-          <span className="font-mono text-[11px] uppercase tracking-widest text-ink-dim">
-            Conversation
-          </span>
-          <button
-            onClick={clear}
-            title="Clear conversation"
-            className="flex items-center gap-1 font-display text-[11px] uppercase tracking-wider text-ink-dim transition-colors hover:text-ink"
-          >
-            Clear <X size={12} />
-          </button>
-        </div>
-      )}
-
-      {turns.map((t) => (
-        <div key={t.id} className="flex flex-col gap-1.5">
-          {/* Message */}
-          <div className="self-end max-w-[90%] border-2 border-edge bg-accent/15 px-2.5 py-1.5 text-sm text-ink">
-            {t.mode !== "ask" && (
-              <span className="mb-0.5 flex items-center gap-1 font-mono text-[9px] uppercase tracking-widest text-accent">
-                {t.mode === "bug" ? <Bug size={9} /> : <Lightbulb size={9} />}
-                {t.mode === "bug" ? "Bug report" : "Feature request"}
-              </span>
-            )}
-            {t.question}
-          </div>
-          {/* Answer */}
-          <div
-            className={`max-w-[95%] border-2 px-2.5 py-1.5 text-sm leading-snug ${
-              t.status === "error"
-                ? "border-edge text-ink-dim"
-                : "border-edge bg-white/5 text-ink"
-            }`}
-          >
-            {t.answer}
-          </div>
-          {/* Filed-issue link (bug / feature turns) */}
-          {t.issueUrl && (
-            <a
-              href={t.issueUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 self-start border-2 border-edge bg-white/5 px-2.5 py-1.5 text-[11px] font-display uppercase tracking-wider text-accent transition-colors hover:bg-white/10"
-            >
-              <ExternalLink size={12} /> Filed #{t.issueNumber} — view on Linear
-            </a>
-          )}
-          {/* Matching papers */}
-          {t.papers.length > 0 && (
-            <div className="max-h-[28vh] overflow-y-auto custom-scrollbar border-2 border-edge">
-              {t.papers.map((p) => (
-                <button
-                  key={p.id}
-                  onClick={() => onPickPaper(p.id)}
-                  className="flex w-full flex-col gap-1.5 border-b border-white/8 px-3 py-2.5 text-left transition-colors last:border-0 hover:bg-accent/15"
-                >
-                  <span className="block text-sm leading-snug text-ink line-clamp-2">
-                    {p.title}
-                  </span>
-                  <span className="flex flex-wrap items-center gap-2 font-mono text-[10px] uppercase tracking-wider text-ink-dim">
-                    {p.year != null && <span>{p.year}</span>}
-                    <span className="text-accent">
-                      {p.citations.toLocaleString()} cites
-                    </span>
-                    {p.domainName && (
-                      <span className="flex min-w-0 items-center gap-1">
-                        <span
-                          className="h-2 w-2 shrink-0 border border-edge"
-                          style={{
-                            background: getDomainColorStr(
-                              domainIndexById[p.domainId] ?? 0,
-                            ),
-                          }}
-                        />
-                        <span className="truncate">{p.domainName}</span>
-                      </span>
-                    )}
-                  </span>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      ))}
-
-    </div>
-  );
 }

@@ -6,6 +6,7 @@ import { TourOverlay } from "./TourOverlay";
 import { FlyHud } from "./FlyHud";
 import { Footer } from "./Footer";
 import { InfoDrawer } from "./InfoDrawer";
+import { AskDrawer } from "./AskDrawer";
 import { ChangelogDrawer } from "./ChangelogDrawer";
 import { CustomizeDrawer } from "./CustomizeDrawer";
 import { galaxyData } from "@/data/galaxy";
@@ -73,6 +74,7 @@ export function Overlay() {
           )}
           <TourOverlay />
           <InfoDrawer />
+          <AskDrawer />
           <ChangelogDrawer />
           <CustomizeDrawer />
         </>

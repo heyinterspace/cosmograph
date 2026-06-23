@@ -54,6 +54,8 @@ interface AppState {
   setPaywallOpen: (val: boolean) => void;
   infoOpen: boolean;
   setInfoOpen: (val: boolean) => void;
+  askOpen: boolean;
+  setAskOpen: (val: boolean) => void;
   changelogOpen: boolean;
   setChangelogOpen: (val: boolean) => void;
   customizeOpen: boolean;
@@ -153,6 +155,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [tourActive, setTourActive] = useState(false);
   const [tourStopIndex, setTourStopIndex] = useState(0);
   const [infoOpen, setInfoOpen] = useState(false);
+  const [askOpen, setAskOpen] = useState(false);
   const [changelogOpen, setChangelogOpen] = useState(false);
   const [customizeOpen, setCustomizeOpen] = useState(false);
 
@@ -301,6 +304,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
         setPaywallOpen,
         infoOpen,
         setInfoOpen,
+        askOpen,
+        setAskOpen,
         changelogOpen,
         setChangelogOpen,
         customizeOpen,
