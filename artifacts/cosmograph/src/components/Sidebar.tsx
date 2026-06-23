@@ -18,7 +18,6 @@ import {
   ChevronLeft,
   ChevronDown,
   Check,
-  Sparkles,
   Heart,
   Lock,
   UserRound,
@@ -222,17 +221,13 @@ export function Sidebar() {
                 onToggle={() => toggleSection("account")}
                 first
               >
-                <AccountIndicator />
-              </CollapsibleSection>
-
-              {/* Customize */}
-              <CollapsibleSection
-                icon={<Sparkles size={15} />}
-                title="Customize"
-                isOpen={openSections.customize}
-                onToggle={() => toggleSection("customize")}
-              >
                 <div className="flex flex-col gap-1.5">
+                  <AccountIndicator />
+                  <ConsoleButton
+                    onClick={() => setInfoOpen(true)}
+                    icon={<Info size={14} />}
+                    label="Info"
+                  />
                   <a
                     href={SITE.github.sponsors}
                     target="_blank"
@@ -269,11 +264,6 @@ export function Sidebar() {
                 onToggle={() => toggleSection("navigate")}
               >
                 <div className="flex flex-col gap-1.5">
-                  <ConsoleButton
-                    onClick={() => setInfoOpen(true)}
-                    icon={<Info size={14} />}
-                    label="Info"
-                  />
                   <ConsoleButton
                     active={cameraMode === "god"}
                     onClick={() => setCameraMode("god")}
@@ -544,8 +534,9 @@ export function Sidebar() {
             <Divider />
             {/* Account */}
             <AccountIndicatorRail />
-            <Divider />
-            {/* Customize */}
+            <RailButton onClick={() => setInfoOpen(true)} label="Info">
+              <Info size={16} />
+            </RailButton>
             <RailTip label="Donate">
               <a
                 href={SITE.github.sponsors}
@@ -567,9 +558,6 @@ export function Sidebar() {
             </RailTip>
             <Divider />
             {/* Navigate */}
-            <RailButton onClick={() => setInfoOpen(true)} label="Info">
-              <Info size={16} />
-            </RailButton>
             <RailButton
               active={cameraMode === "god"}
               onClick={() => setCameraMode("god")}
@@ -610,12 +598,11 @@ export function Sidebar() {
   );
 }
 
-type SectionKey = "account" | "customize" | "share" | "navigate" | "filter";
+type SectionKey = "account" | "share" | "navigate" | "filter";
 
 const SECTION_STORAGE_KEY = "galaxy.console.sections";
 const DEFAULT_SECTIONS: Record<SectionKey, boolean> = {
   account: true,
-  customize: true,
   share: true,
   navigate: true,
   filter: true,
