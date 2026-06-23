@@ -57,7 +57,7 @@ export function Sidebar() {
     <TooltipProvider delayDuration={150} skipDelayDuration={400}>
     <div
       className={`console-panel absolute right-0 top-0 z-30 flex h-full flex-col overflow-hidden transition-[width] duration-[450ms] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-[width] ${
-        open ? "w-[min(14rem,80vw)]" : "w-14"
+        open ? "w-[min(12rem,80vw)]" : "w-14"
       }`}
     >
       <AnimatePresence mode="wait" initial={false}>
