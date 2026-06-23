@@ -74,8 +74,12 @@ export function Cockpit({
 
       {/* Top HUD bar */}
       <div
-        className="absolute inset-x-0 top-0 flex items-center justify-between px-6 py-3 text-[10px] uppercase tracking-[0.3em] text-ink-dim"
-        style={{ borderBottom: `2px solid rgba(${ACCENT},0.5)` }}
+        className="absolute inset-x-0 top-0 flex items-center justify-between px-6 py-3 text-[10px] uppercase tracking-[0.3em] text-ink-dim backdrop-blur-[6px]"
+        style={{
+          borderBottom: `2px solid rgba(${ACCENT},0.5)`,
+          background:
+            "linear-gradient(180deg, rgba(6,7,13,0.85) 0%, rgba(6,7,13,0.55) 55%, rgba(6,7,13,0) 100%)",
+        }}
       >
         <span>Cosmograph · Flight Systems</span>
         <span className="hidden text-accent/80 sm:block">Ad Astra</span>
