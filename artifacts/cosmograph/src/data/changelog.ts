@@ -17,6 +17,16 @@ export interface ChangelogEntry {
  */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "3.5.0",
+    codename: "Make It Yours",
+    date: "2026-06-23",
+    summary: "Customize gets its own premium tab in the console.",
+    changes: [
+      "Pulled the scientist search out of the Info drawer into a dedicated Customize tab, flagged with a Premium badge so it's clear deep exploration of a custom scientist is a paid unlock.",
+      "Refreshed the Ask panel's starter prompts into clickable chips.",
+    ],
+  },
+  {
     version: "3.4.0",
     codename: "Mission Control",
     date: "2026-06-23",

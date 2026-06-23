@@ -23,6 +23,7 @@ import {
   LayoutGrid,
   Rocket,
   Telescope,
+  Crown,
 } from "lucide-react";
 import { useTranslateAsk, useReportFeedback } from "@workspace/api-client-react";
 import { useAppState } from "@/lib/store";
@@ -138,6 +139,28 @@ export function Sidebar() {
               />
               <AccountIndicator />
 
+              {/* Customize — its own premium tab */}
+              <CollapsibleSection
+                icon={<Telescope size={15} />}
+                title="Customize"
+                isOpen={openSections.customize}
+                onToggle={() => toggleSection("customize")}
+                right={<PremiumBadge />}
+              >
+                <div className="flex flex-col gap-2">
+                  <p className="text-[11px] leading-relaxed text-ink-dim">
+                    Re-map the galaxy around any researcher — a parent, a mentor,
+                    a hero, or yourself. Deep exploration of a custom scientist is a
+                    premium unlock.
+                  </p>
+                  <ConsoleButton
+                    onClick={() => setCustomizeOpen(true)}
+                    icon={<Telescope size={14} />}
+                    label="Choose a scientist"
+                  />
+                </div>
+              </CollapsibleSection>
+
               {/* Share */}
               <CollapsibleSection
                 icon={<Share2 size={15} />}
@@ -159,11 +182,6 @@ export function Sidebar() {
                 onToggle={() => toggleSection("platform")}
               >
                 <div className="flex flex-col gap-1.5">
-                  <ConsoleButton
-                    onClick={() => setCustomizeOpen(true)}
-                    icon={<Telescope size={14} />}
-                    label="Customize"
-                  />
                   <ConsoleButton
                     onClick={() => setChangelogOpen(true)}
                     icon={<Rocket size={14} />}
@@ -270,10 +288,14 @@ export function Sidebar() {
               <ShareButton />
             </RailTip>
             <Divider />
-            {/* Platform */}
-            <RailButton onClick={() => setCustomizeOpen(true)} label="Customize">
+            {/* Customize (premium) */}
+            <RailButton onClick={() => setCustomizeOpen(true)} label="Customize · Premium">
               <Telescope size={15} />
+              <span className="absolute -top-1.5 -right-1.5 grid h-3.5 w-3.5 place-items-center rounded-full bg-accent text-black ring-2 ring-black">
+                <Crown size={8} />
+              </span>
             </RailButton>
+            {/* Platform */}
             <RailButton onClick={() => setChangelogOpen(true)} label="Changelog">
               <Rocket size={15} />
             </RailButton>
@@ -327,10 +349,11 @@ export function Sidebar() {
   );
 }
 
-type SectionKey = "share" | "navigate" | "ask" | "platform";
+type SectionKey = "customize" | "share" | "navigate" | "ask" | "platform";
 
 const SECTION_STORAGE_KEY = "galaxy.console.sections";
 const DEFAULT_SECTIONS: Record<SectionKey, boolean> = {
+  customize: true,
   share: true,
   navigate: true,
   ask: true,
@@ -400,6 +423,14 @@ function CollapsibleSection({
       </button>
       {isOpen && <div className="mt-3">{children}</div>}
     </div>
+  );
+}
+
+function PremiumBadge() {
+  return (
+    <span className="flex items-center gap-1 border border-accent/60 bg-accent/10 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-widest text-accent">
+      <Crown size={9} /> Premium
+    </span>
   );
 }
 
