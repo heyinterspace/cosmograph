@@ -192,9 +192,9 @@ export function Sidebar() {
                     target="_blank"
                     rel="noopener noreferrer"
                     title="Support development via GitHub Sponsors"
-                    className="flex h-9 w-full items-center gap-2 border-2 border-edge bg-white/5 px-3 text-ink transition-all hover:bg-white/10"
+                    className="flex h-9 w-full items-center gap-2 border-2 border-accent bg-accent px-3 text-white transition-all hover:brightness-110"
                   >
-                    <Heart size={14} className="shrink-0 text-accent" />
+                    <Heart size={14} className="shrink-0 text-white" />
                     <span className="font-display text-[11px] uppercase tracking-wider">
                       Donate
                     </span>
@@ -305,7 +305,7 @@ export function Sidebar() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Donate via GitHub Sponsors"
-                className="relative flex h-9 w-9 items-center justify-center border-2 border-edge bg-white/5 text-accent transition-all hover:bg-white/10"
+                className="relative flex h-9 w-9 items-center justify-center border-2 border-accent bg-accent text-white transition-all hover:brightness-110"
               >
                 <Heart size={15} />
               </a>
