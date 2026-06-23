@@ -835,7 +835,7 @@ function AskPanel({
   );
 }
 
-// "Report a bug / request a feature" — files a public GitHub issue via the API.
+// "Report a bug / request a feature" — files a Linear issue via the API.
 function FeedbackForm() {
   const [open, setOpen] = useState(false);
   const [kind, setKind] = useState<"bug" | "feature">("bug");
@@ -917,7 +917,7 @@ function FeedbackForm() {
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 border-2 border-edge bg-white/5 px-2 py-1.5 text-[11px] font-display uppercase tracking-wider text-accent transition-colors hover:bg-white/10"
             >
-              <ExternalLink size={12} /> Filed #{created.number} — view on GitHub
+              <ExternalLink size={12} /> Filed #{created.number} — view on Linear
             </a>
           ) : (
             <button

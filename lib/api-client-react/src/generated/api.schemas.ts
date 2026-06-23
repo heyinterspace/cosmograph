@@ -119,9 +119,9 @@ export interface FeedbackRequest {
 }
 
 export interface FeedbackResult {
-  /** The public URL of the created GitHub issue. */
+  /** The URL of the created Linear issue. */
   url: string;
-  /** The GitHub issue number. */
+  /** The Linear issue number (per-team). */
   number: number;
 }
 

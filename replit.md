@@ -56,9 +56,9 @@ Disambiguate by research cluster (institution + co-author), **not** by year alon
 - The Sidebar console's old Filter panel is now an **Ask** chat panel: the visitor asks a natural-language question about the scientist's work and matching papers light up in the galaxy.
 - **The LLM is only a translator.** `POST /api/ask/translate` (`src/routes/ask.ts` → `src/lib/ask.ts`, OpenAI via the `@workspace/integrations-openai-ai-server` integration) turns the question into a small, validated structured query spec (`TranslateAskResponse` Zod schema). It never returns counts, paper lists, or prose — only a spec like `{intent, text, minYear, minCitations, sortBy, ... , unsupported}`.
 - **All answers are computed deterministically in-browser** by `runAskQuery` (`artifacts/cosmograph/src/data/galaxy.ts`) over the locally-baked `galaxyData.json`. Counts and matched papers are real, never hallucinated. The spec is converted to the existing `Filters` shape and pushed through the normal `filters → matchingIds` dim/highlight path in `GalaxySystem` — no separate highlight state.
-- **Report a bug / request a feature** files a public GitHub issue: `POST /api/feedback/issue` (`src/routes/feedback.ts` → `src/lib/github.ts`) via the GitHub connector. Repo defaults to `GITHUB_REPO` (`heyinterspace/cosmograph`).
+- **Report a bug / request a feature** files a Linear issue: `POST /api/feedback/issue` (`src/routes/feedback.ts` → `src/lib/linear.ts`) via the Linear connector. Filed into the first Linear team, or set `LINEAR_TEAM_ID` to pin a specific team.
 - Both routes are public and contract-first (OpenAPI → codegen → Zod → `useTranslateAsk`/`useReportFeedback` hooks). They degrade gracefully: if the server/translator is unreachable the galaxy still works, the Ask panel just shows an error.
-- Requires the **OpenAI AI integration** (`AI_INTEGRATIONS_OPENAI_*` env, auto-provisioned) and a bound **GitHub connector** connection for issue filing.
+- Requires the **OpenAI AI integration** (`AI_INTEGRATIONS_OPENAI_*` env, auto-provisioned) and a bound **Linear connector** connection for issue filing.
 
 ## Stack
 

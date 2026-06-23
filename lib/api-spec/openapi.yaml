@@ -136,9 +136,9 @@ paths:
     post:
       operationId: reportFeedback
       tags: [feedback]
-      summary: File a bug report or feature request as a public GitHub issue
+      summary: File a bug report or feature request as a Linear issue
       description: >
-        Creates a public issue on the project's GitHub repository from a
+        Creates an issue in the project's Linear workspace from a
         visitor's message. Used by the Ask panel's "report a bug / request a
         feature" affordance.
       requestBody:
@@ -149,7 +149,7 @@ paths:
               $ref: "#/components/schemas/FeedbackRequest"
       responses:
         "201":
-          description: The GitHub issue was created
+          description: The Linear issue was created
           content:
             application/json:
               schema:
@@ -161,7 +161,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
         "502":
-          description: GitHub is unreachable or issue creation failed
+          description: Linear is unreachable or issue creation failed
           content:
             application/json:
               schema:
@@ -310,10 +310,10 @@ components:
       properties:
         url:
           type: string
-          description: The public URL of the created GitHub issue.
+          description: The URL of the created Linear issue.
         number:
           type: integer
-          description: The GitHub issue number.
+          description: The Linear issue number (per-team).
       required:
         - url
         - number

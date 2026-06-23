@@ -427,9 +427,9 @@ export const getReportFeedbackUrl = () => {
 }
 
 /**
- * Creates a public issue on the project's GitHub repository from a visitor's message. Used by the Ask panel's "report a bug / request a feature" affordance.
+ * Creates an issue in the project's Linear workspace from a visitor's message. Used by the Ask panel's "report a bug / request a feature" affordance.
 
- * @summary File a bug report or feature request as a public GitHub issue
+ * @summary File a bug report or feature request as a Linear issue
  */
 export const reportFeedback = async (feedbackRequest: FeedbackRequest, options?: RequestInit): Promise<FeedbackResult> => {
 
@@ -478,7 +478,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type ReportFeedbackMutationError = ErrorType<Error>
 
     /**
- * @summary File a bug report or feature request as a public GitHub issue
+ * @summary File a bug report or feature request as a Linear issue
  */
 export const useReportFeedback = <TError = ErrorType<Error>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reportFeedback>>, TError,{data: BodyType<FeedbackRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
