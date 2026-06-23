@@ -1,8 +1,13 @@
 uploads = []
-outputs = []
 
 [[generated]]
 id = "DS1i9Xawf-XWFwJlu6YX6"
 uri = "file://artifacts/galaxy/public/opengraph.png"
 type = "image"
 title = "generated_image"
+
+[[outputs]]
+id = "NCkDunO3PXHNWKkp8Ni4C"
+uri = "file://README.md"
+type = "text"
+title = "Cosmograph README"
