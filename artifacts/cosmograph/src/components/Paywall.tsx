@@ -18,8 +18,13 @@ export const PERKS = [
 ];
 
 export function Paywall() {
-  const { paywallOpen, setPaywallOpen, setEntitlement, activeAuthorLabel } =
-    useAppState();
+  const {
+    paywallOpen,
+    setPaywallOpen,
+    setEntitlement,
+    activeAuthorLabel,
+    activeAuthorId,
+  } = useAppState();
   const [, setLocation] = useLocation();
   const checkout = useCreateCheckout();
 
@@ -29,7 +34,9 @@ export function Paywall() {
   };
 
   const startCheckout = () => {
-    checkout.mutate(undefined, {
+    // Carry the explored scientist through the Stripe round-trip so the success
+    // redirect returns to this galaxy, not the default home scientist.
+    checkout.mutate({ data: { author: activeAuthorId } }, {
       onSuccess: (res) => {
         if (res.alreadyEntitled) {
           setEntitlement(true);

@@ -10,3 +10,4 @@
 - [Version bumping](version-bumping.md) — UI version = CHANGELOG[0].version (hand-written), not git-derived; prepend a changelog entry AND sync package.json when shipping features.
 - [Stripe membership entitlement](stripe-entitlement-design.md) — $10/year subscription: users.has_paid = active member, granted on payment_status=paid (confirm + webhook), revoked on subscription end; DB-only read has no live re-check; donations are GitHub Sponsors.
 - [Stripe + stripe-replit-sync setup](stripe-replit-sync-setup.md) — connector secret is `settings.secret` (not `secret_key`); externalize `stripe-replit-sync` from esbuild or runMigrations silently skips table creation (empty `stripe` schema).
+- [Active scientist in URL](active-scientist-url.md) — explored author encoded as `?author=A123`; carry it through Stripe Checkout (sanitized into success/cancel_url) so redirects don't dump users on the default scientist.

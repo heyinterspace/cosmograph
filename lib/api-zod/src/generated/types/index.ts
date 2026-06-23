@@ -13,6 +13,7 @@ export * from './askQueryIntent';
 export * from './askQuerySortBy';
 export * from './askQuerySortDir';
 export * from './askRequest';
+export * from './checkoutRequest';
 export * from './checkoutSession';
 export * from './confirmRequest';
 export * from './entitlement';

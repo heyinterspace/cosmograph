@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { ConfirmCheckoutBody } from "@workspace/api-zod";
+import { ConfirmCheckoutBody, CreateCheckoutBody } from "@workspace/api-zod";
 import { requireAuth } from "../middlewares/requireAuth";
 import {
   getEntitlement,
@@ -18,8 +18,10 @@ router.get("/me/entitlement", requireAuth, async (req, res) => {
 // Start the one-time unlock checkout (or report the account already owns it).
 router.post("/billing/checkout", requireAuth, async (req, res) => {
   const origin = `${req.protocol}://${req.get("host")}`;
+  const parsed = CreateCheckoutBody.safeParse(req.body ?? {});
+  const author = parsed.success ? parsed.data.author : null;
   try {
-    const result = await createCheckout(req.userId!, origin, req.log);
+    const result = await createCheckout(req.userId!, origin, req.log, author);
     res.json(result);
   } catch (err) {
     req.log.error({ err }, "failed to create checkout session");

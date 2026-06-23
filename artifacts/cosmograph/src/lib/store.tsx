@@ -1,8 +1,9 @@
-import React, { createContext, useContext, useState, useCallback, useRef, useMemo, ReactNode } from 'react';
-import { Filters, makeDefaultFilters, applyDataset, galaxyData, isDefaultAuthor } from '@/data/galaxy';
+import React, { createContext, useContext, useState, useCallback, useRef, useMemo, useEffect, ReactNode } from 'react';
+import { Filters, makeDefaultFilters, applyDataset, galaxyData, isDefaultAuthor, DEFAULT_AUTHOR_ID } from '@/data/galaxy';
 import { buildGalaxyData } from '@/data/buildGalaxy';
 import { fetchAuthor, fetchAuthorWorks, type AuthorCandidate } from '@/lib/openalex';
 import { rebuildLayout } from '@/components/GalaxySystem';
+import { readAuthorParam, writeAuthorParam } from '@/lib/authorUrl';
 
 export type DatasetStatus = 'idle' | 'loading' | 'ready' | 'error';
 
@@ -70,6 +71,7 @@ interface AppState {
   datasetError: string | null;
   loadProgress: { fetched: number; total: number } | null;
   activeAuthorLabel: string;
+  activeAuthorId: string | null;
   loadAuthor: (target: string | AuthorCandidate) => Promise<void>;
   dismissDatasetError: () => void;
 }
@@ -181,6 +183,9 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [datasetError, setDatasetError] = useState<string | null>(null);
   const [loadProgress, setLoadProgress] = useState<{ fetched: number; total: number } | null>(null);
   const [activeAuthorLabel, setActiveAuthorLabel] = useState<string>(galaxyData.author.name);
+  const [activeAuthorId, setActiveAuthorId] = useState<string | null>(
+    galaxyData.author.openAlexId ?? null,
+  );
   // Monotonic request id so a superseded (older) load can't clobber a newer one.
   const loadReqRef = useRef(0);
 
@@ -210,6 +215,11 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       setCameraModeState('god');
       setFiltersState(makeDefaultFilters());
       setActiveAuthorLabel(data.author.name);
+      const loadedId = data.author.openAlexId ?? id;
+      setActiveAuthorId(loadedId);
+      // Keep the URL in sync so a reload (or the Stripe round-trip) restores this
+      // scientist. The default scientist clears the param for a clean home URL.
+      writeAuthorParam(loadedId === DEFAULT_AUTHOR_ID ? null : loadedId);
       setDatasetVersion((v) => v + 1);
       setDatasetStatus('ready');
       setLoadProgress(null);
@@ -228,6 +238,19 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setDatasetStatus('idle');
     setDatasetError(null);
     setLoadProgress(null);
+  }, []);
+
+  // On first load, restore the scientist named in the URL (?author=A123). This
+  // covers a plain reload/shared link AND the return from Stripe Checkout, which
+  // redirects back to the app's base URL and would otherwise drop the user on
+  // the default home scientist instead of the one they just paid to unlock.
+  useEffect(() => {
+    const requested = readAuthorParam();
+    if (requested && requested !== DEFAULT_AUTHOR_ID) {
+      void loadAuthor(requested);
+    }
+    // Run once on mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Gated camera switch: only "spaceship" (fly) is paywalled — "god"/orbit is
@@ -317,6 +340,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
         datasetError,
         loadProgress,
         activeAuthorLabel,
+        activeAuthorId,
         loadAuthor,
         dismissDatasetError,
       }}

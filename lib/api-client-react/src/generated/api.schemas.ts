@@ -23,6 +23,12 @@ export interface CheckoutSession {
   alreadyEntitled: boolean;
 }
 
+export interface CheckoutRequest {
+  /** OpenAlex author id of the scientist currently being explored, so the post-payment redirect returns to that galaxy instead of the default.
+   */
+  author?: string | null;
+}
+
 export interface ConfirmRequest {
   /** The Stripe Checkout session id returned on the success redirect. */
   sessionId: string;

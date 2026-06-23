@@ -22,6 +22,7 @@ import type {
 import type {
   AskQuery,
   AskRequest,
+  CheckoutRequest,
   CheckoutSession,
   ConfirmRequest,
   Entitlement,
@@ -213,14 +214,15 @@ export const getCreateCheckoutUrl = () => {
 
  * @summary Start the membership subscription checkout
  */
-export const createCheckout = async ( options?: RequestInit): Promise<CheckoutSession> => {
+export const createCheckout = async (checkoutRequest?: CheckoutRequest, options?: RequestInit): Promise<CheckoutSession> => {
 
   return customFetch<CheckoutSession>(getCreateCheckoutUrl(),
   {
     ...options,
-    method: 'POST'
-
-
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      checkoutRequest,)
   }
 );}
 
@@ -228,8 +230,8 @@ export const createCheckout = async ( options?: RequestInit): Promise<CheckoutSe
 
 
 export const getCreateCheckoutMutationOptions = <TError = ErrorType<Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCheckout>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof createCheckout>>, TError,void, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCheckout>>, TError,{data?: BodyType<CheckoutRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createCheckout>>, TError,{data?: BodyType<CheckoutRequest>}, TContext> => {
 
 const mutationKey = ['createCheckout'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -241,10 +243,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createCheckout>>, void> = () => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createCheckout>>, {data?: BodyType<CheckoutRequest>}> = (props) => {
+          const {data} = props ?? {};
 
-
-          return  createCheckout(requestOptions)
+          return  createCheckout(data,requestOptions)
         }
 
 
@@ -255,18 +257,18 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type CreateCheckoutMutationResult = NonNullable<Awaited<ReturnType<typeof createCheckout>>>
-
+    export type CreateCheckoutMutationBody = BodyType<CheckoutRequest> | undefined
     export type CreateCheckoutMutationError = ErrorType<Error>
 
     /**
  * @summary Start the membership subscription checkout
  */
 export const useCreateCheckout = <TError = ErrorType<Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCheckout>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCheckout>>, TError,{data?: BodyType<CheckoutRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof createCheckout>>,
         TError,
-        void,
+        {data?: BodyType<CheckoutRequest>},
         TContext
       > => {
       return useMutation(getCreateCheckoutMutationOptions(options));

@@ -36,7 +36,7 @@ const SPONSOR_URL = "https://github.com/sponsors/heyinterspace";
 // only the static screenshot + a Subscribe CTA remain. The home/default
 // scientist never reaches this (it's free) and members never reach it (entitled).
 export function ScreenshotGate() {
-  const { activeAuthorLabel, setEntitlement } = useAppState();
+  const { activeAuthorLabel, activeAuthorId, setEntitlement } = useAppState();
   const [, setLocation] = useLocation();
   const checkout = useCreateCheckout();
 
@@ -88,7 +88,10 @@ export function ScreenshotGate() {
   };
 
   const startCheckout = () => {
-    checkout.mutate(undefined, {
+    // Carry the explored scientist through the Stripe round-trip so the success
+    // redirect returns to this galaxy (encoded as ?author= in success_url),
+    // not the default home scientist.
+    checkout.mutate({ data: { author: activeAuthorId } }, {
       onSuccess: (res) => {
         if (res.alreadyEntitled) {
           setEntitlement(true);

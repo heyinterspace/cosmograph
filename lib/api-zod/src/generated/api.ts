@@ -33,6 +33,10 @@ export const GetEntitlementResponse = zod.object({
 
  * @summary Start the membership subscription checkout
  */
+export const CreateCheckoutBody = zod.object({
+  "author": zod.string().nullish().describe('OpenAlex author id of the scientist currently being explored, so the post-payment redirect returns to that galaxy instead of the default.\n')
+})
+
 export const CreateCheckoutResponse = zod.object({
   "url": zod.string().nullish().describe('Hosted Stripe Checkout URL to redirect to, when a session was created.'),
   "alreadyEntitled": zod.boolean().describe('True when the account is already an active member; no checkout was created.')

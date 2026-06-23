@@ -140,10 +140,20 @@ async function getOrCreateMembershipPrice(
   });
 }
 
+// Sanitize an OpenAlex author id before embedding it in the redirect URLs:
+// keep only the canonical `A` + digits form so a tampered value can't inject
+// extra query params or otherwise rewrite the success/cancel URL.
+function sanitizeAuthorId(author: string | null | undefined): string | null {
+  if (!author) return null;
+  const trimmed = author.trim();
+  return /^A\d+$/.test(trimmed) ? trimmed : null;
+}
+
 export async function createCheckout(
   userId: string,
   origin: string,
   log: Logger,
+  author?: string | null,
 ): Promise<CheckoutResult> {
   const email = await fetchClerkEmail(userId);
   const user = await getOrCreateUser(userId, email);
@@ -153,12 +163,17 @@ export async function createCheckout(
   const customerId = await ensureCustomer(stripe, user);
   const price = await getOrCreateMembershipPrice(stripe);
 
+  // Carry the explored scientist through the Stripe round-trip so the user lands
+  // back on the galaxy they paid to unlock, not the default home scientist.
+  const authorId = sanitizeAuthorId(author);
+  const authorParam = authorId ? `author=${authorId}&` : "";
+
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
     customer: customerId,
     line_items: [{ price: price.id, quantity: 1 }],
-    success_url: `${origin}/?unlocked=1&session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${origin}/?unlock_cancelled=1`,
+    success_url: `${origin}/?${authorParam}unlocked=1&session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${origin}/?${authorParam}unlock_cancelled=1`,
     metadata: { userId },
     subscription_data: { metadata: { userId } },
   });
