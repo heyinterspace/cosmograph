@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
-import { Loader2, Copy, Check, Heart, ArrowLeft } from "lucide-react";
+import { Copy, Check, Heart, ArrowLeft } from "lucide-react";
 import { useAppState } from "@/lib/store";
 import { Scene } from "@/components/Scene";
 import { PERKS } from "@/components/Paywall";
@@ -19,7 +19,7 @@ const SPONSOR_URL = "https://github.com/sponsors/heyinterspace";
 // Subscribe CTA. The home/default scientist never reaches this (it's free) and
 // members never reach it (entitled).
 export function ScreenshotGate() {
-  const { activeAuthorLabel } = useAppState();
+  const { activeAuthorLabel, setPreviewReady } = useAppState();
 
   // Capture lifecycle: keep the hidden Scene mounted only long enough to render
   // a frame, snapshot it into the share card, then unmount the GPU scene.
@@ -53,7 +53,10 @@ export function ScreenshotGate() {
       setImageUrl(url);
     }
     setCapturing(false);
-  }, []);
+    // Release the unified loading overlay: the preview is now ready (or failed),
+    // so the gate panel can be revealed in a single continuous load.
+    setPreviewReady(true);
+  }, [setPreviewReady]);
 
   // Fire only once the scene's <Suspense> has resolved (textures loaded). Wait
   // two animation frames so the first textured frame is actually painted into
@@ -98,7 +101,10 @@ export function ScreenshotGate() {
     setImageCopied(ok);
     if (ok) {
       if (copyResetTimer.current) window.clearTimeout(copyResetTimer.current);
-      copyResetTimer.current = window.setTimeout(() => setImageCopied(false), 2400);
+      copyResetTimer.current = window.setTimeout(
+        () => setImageCopied(false),
+        2400,
+      );
     } else {
       toast.error("Copying images isn't supported in this browser.");
     }
@@ -110,7 +116,10 @@ export function ScreenshotGate() {
           preserveDrawingBuffer lets buildShareCard read the last drawn frame even
           though the canvas is never shown to the visitor. */}
       {capturing && (
-        <div className="pointer-events-none absolute inset-0 opacity-0" aria-hidden>
+        <div
+          className="pointer-events-none absolute inset-0 opacity-0"
+          aria-hidden
+        >
           <Scene captureTopDown onReady={handleSceneReady} />
         </div>
       )}
@@ -137,9 +146,12 @@ export function ScreenshotGate() {
           transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
           className="glass-panel my-auto w-full max-w-md p-6 sm:p-7"
         >
-          {/* The captured cosmograph preview, shown inside the panel. */}
-          <div className="mb-4 overflow-hidden border-2 border-edge bg-black/40">
-            {imageUrl ? (
+          {/* The captured cosmograph preview, shown inside the panel. The unified
+              loading overlay stays up until the capture settles, so by the time
+              this panel is revealed the image is already ready — no second
+              spinner. If capture failed (no blob) the box is simply omitted. */}
+          {imageUrl && (
+            <div className="mb-4 overflow-hidden border-2 border-edge bg-black/40">
               <motion.img
                 key="card"
                 src={imageUrl}
@@ -149,13 +161,8 @@ export function ScreenshotGate() {
                 transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                 className="block w-full"
               />
-            ) : (
-              <div className="flex aspect-[1200/630] w-full items-center justify-center gap-2 font-mono text-[10px] uppercase tracking-widest text-ink-dim">
-                <Loader2 size={14} className="animate-spin" />
-                Rendering preview…
-              </div>
-            )}
-          </div>
+            </div>
+          )}
 
           <MembershipPitch />
 

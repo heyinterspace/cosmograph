@@ -1,13 +1,33 @@
-import React, { createContext, useContext, useState, useCallback, useRef, useMemo, useEffect, ReactNode } from 'react';
-import { Filters, makeDefaultFilters, applyDataset, galaxyData, isDefaultAuthor, DEFAULT_AUTHOR_ID } from '@/data/galaxy';
-import { buildGalaxyData } from '@/data/buildGalaxy';
-import { fetchAuthor, fetchAuthorWorks, type AuthorCandidate } from '@/lib/openalex';
-import { rebuildLayout } from '@/components/GalaxySystem';
-import { readAuthorParam, writeAuthorParam } from '@/lib/authorUrl';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useRef,
+  useMemo,
+  useEffect,
+  ReactNode,
+} from "react";
+import {
+  Filters,
+  makeDefaultFilters,
+  applyDataset,
+  galaxyData,
+  isDefaultAuthor,
+  DEFAULT_AUTHOR_ID,
+} from "@/data/galaxy";
+import { buildGalaxyData } from "@/data/buildGalaxy";
+import {
+  fetchAuthor,
+  fetchAuthorWorks,
+  type AuthorCandidate,
+} from "@/lib/openalex";
+import { rebuildLayout } from "@/components/GalaxySystem";
+import { readAuthorParam, writeAuthorParam } from "@/lib/authorUrl";
 
-export type DatasetStatus = 'idle' | 'loading' | 'ready' | 'error';
+export type DatasetStatus = "idle" | "loading" | "ready" | "error";
 
-export type CameraMode = 'god' | 'spaceship';
+export type CameraMode = "god" | "spaceship";
 
 // The entitlement snapshot pushed in from the server (EntitlementBridge): whether
 // the account is an active member, which researchers it has unlocked, and how many
@@ -19,12 +39,12 @@ export type EntitlementState = {
 };
 
 export type SelectedObject = {
-  type: 'sun' | 'planet';
+  type: "sun" | "planet";
   id: string;
 } | null;
 
 export type HoveredObject = {
-  type: 'sun' | 'planet';
+  type: "sun" | "planet";
   id: string;
   name: string;
 } | null;
@@ -83,6 +103,12 @@ interface AppState {
   datasetStatus: DatasetStatus;
   datasetError: string | null;
   loadProgress: { fetched: number; total: number } | null;
+  // For the gated (non-member) path: the unified loading overlay stays up while
+  // ScreenshotGate captures the preview, so there's a single continuous load
+  // instead of a second in-panel spinner. ScreenshotGate flips this true once
+  // its capture settles; loadAuthor resets it false at the start of every load.
+  previewReady: boolean;
+  setPreviewReady: (v: boolean) => void;
   activeAuthorLabel: string;
   activeAuthorId: string | null;
   loadAuthor: (target: string | AuthorCandidate) => Promise<void>;
@@ -91,11 +117,11 @@ interface AppState {
 
 const AppStateContext = createContext<AppState | undefined>(undefined);
 
-const INTRO_SEEN_KEY = 'cosmograph:introSeen';
+const INTRO_SEEN_KEY = "cosmograph:introSeen";
 
 function readIntroSeen(): boolean {
   try {
-    return localStorage.getItem(INTRO_SEEN_KEY) === '1';
+    return localStorage.getItem(INTRO_SEEN_KEY) === "1";
   } catch {
     return false;
   }
@@ -103,7 +129,7 @@ function readIntroSeen(): boolean {
 
 function writeIntroSeen() {
   try {
-    localStorage.setItem(INTRO_SEEN_KEY, '1');
+    localStorage.setItem(INTRO_SEEN_KEY, "1");
   } catch {
     // ignore (private mode / storage disabled)
   }
@@ -153,7 +179,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setChangelogOpen(false);
     setCustomizeOpen(false);
   }, []);
-  const [cameraMode, setCameraModeState] = useState<CameraMode>('god');
+  const [cameraMode, setCameraModeState] = useState<CameraMode>("god");
   const [selectedObject, setSelectedObject] = useState<SelectedObject>(null);
   const [hoveredObject, setHoveredObject] = useState<HoveredObject>(null);
   const [galaxyTilt, setGalaxyTilt] = useState<number>(0);
@@ -201,10 +227,16 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const [datasetVersion, setDatasetVersion] = useState(0);
-  const [datasetStatus, setDatasetStatus] = useState<DatasetStatus>('idle');
+  const [datasetStatus, setDatasetStatus] = useState<DatasetStatus>("idle");
   const [datasetError, setDatasetError] = useState<string | null>(null);
-  const [loadProgress, setLoadProgress] = useState<{ fetched: number; total: number } | null>(null);
-  const [activeAuthorLabel, setActiveAuthorLabel] = useState<string>(galaxyData.author.name);
+  const [loadProgress, setLoadProgress] = useState<{
+    fetched: number;
+    total: number;
+  } | null>(null);
+  const [previewReady, setPreviewReady] = useState(false);
+  const [activeAuthorLabel, setActiveAuthorLabel] = useState<string>(
+    galaxyData.author.name,
+  );
   const [activeAuthorId, setActiveAuthorId] = useState<string | null>(
     galaxyData.author.openAlexId ?? null,
   );
@@ -216,10 +248,11 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   // datasetVersion so the data tree remounts cleanly (see key={datasetVersion}).
   const loadAuthor = useCallback(async (target: string | AuthorCandidate) => {
     const reqId = ++loadReqRef.current;
-    const id = typeof target === 'string' ? target : target.id;
-    setDatasetStatus('loading');
+    const id = typeof target === "string" ? target : target.id;
+    setDatasetStatus("loading");
     setDatasetError(null);
     setLoadProgress({ fetched: 0, total: 0 });
+    setPreviewReady(false);
     try {
       const rawAuthor = await fetchAuthor(id);
       const rawWorks = await fetchAuthorWorks(id, (fetched, total) => {
@@ -234,7 +267,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       setHoveredObject(null);
       setTourActive(false);
       setTourStopIndex(0);
-      setCameraModeState('god');
+      setCameraModeState("god");
       setFiltersState(makeDefaultFilters());
       setActiveAuthorLabel(data.author.name);
       const loadedId = data.author.openAlexId ?? id;
@@ -243,18 +276,18 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       // scientist. The default scientist clears the param for a clean home URL.
       writeAuthorParam(loadedId === DEFAULT_AUTHOR_ID ? null : loadedId);
       setDatasetVersion((v) => v + 1);
-      setDatasetStatus('ready');
+      setDatasetStatus("ready");
       setLoadProgress(null);
     } catch (err) {
       if (loadReqRef.current !== reqId) return;
-      setDatasetStatus('error');
+      setDatasetStatus("error");
       const status = (err as { status?: number })?.status;
       setDatasetError(
         status === 429
-          ? 'OpenAlex is rate-limiting requests right now — please try again in a little while.'
+          ? "OpenAlex is rate-limiting requests right now — please try again in a little while."
           : err instanceof Error
             ? err.message
-            : 'Could not load this researcher from OpenAlex.',
+            : "Could not load this researcher from OpenAlex.",
       );
       setLoadProgress(null);
     }
@@ -262,7 +295,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
   const dismissDatasetError = useCallback(() => {
     loadReqRef.current++; // invalidate any in-flight load
-    setDatasetStatus('idle');
+    setDatasetStatus("idle");
     setDatasetError(null);
     setLoadProgress(null);
   }, []);
@@ -284,7 +317,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   // always free. Reads the gate live so it stays correct after a dataset swap.
   const setCameraMode = useCallback(
     (mode: CameraMode) => {
-      if (mode === 'spaceship' && !canExploreNow()) {
+      if (mode === "spaceship" && !canExploreNow()) {
         setPaywallOpen(true);
         return;
       }
@@ -299,7 +332,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       return;
     }
     setSelectedObject(null);
-    setCameraModeState('god');
+    setCameraModeState("god");
     setTourStopIndex(0);
     setTourActive(true);
   }, [canExploreNow]);
@@ -370,6 +403,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
         datasetStatus,
         datasetError,
         loadProgress,
+        previewReady,
+        setPreviewReady,
         activeAuthorLabel,
         activeAuthorId,
         loadAuthor,
@@ -384,7 +419,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 export function useAppState() {
   const context = useContext(AppStateContext);
   if (context === undefined) {
-    throw new Error('useAppState must be used within an AppStateProvider');
+    throw new Error("useAppState must be used within an AppStateProvider");
   }
   return context;
 }

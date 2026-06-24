@@ -20,7 +20,9 @@ export function MembershipPitch() {
         </div>
         <div>
           <span className="font-mono text-[10px] uppercase tracking-widest text-accent">
-            {entitled ? "Membership · add a researcher" : "Membership · $7 / year"}
+            {entitled
+              ? "Membership · add a researcher"
+              : "Membership · $7 / year"}
           </span>
           <h2 className="text-xl font-title font-bold leading-tight tracking-tight text-ink">
             Unlock {activeAuthorLabel}'s galaxy
@@ -40,8 +42,8 @@ export function MembershipPitch() {
           ) : (
             <>
               You're a member. Unlocking{" "}
-              <span className="text-ink">{activeAuthorLabel}</span> uses 1 of your{" "}
-              <span className="text-ink">{includedSlots}</span> included
+              <span className="text-ink">{activeAuthorLabel}</span> uses 1 of
+              your <span className="text-ink">{includedSlots}</span> included
               researchers — <span className="text-ink">{remaining}</span> left.
             </>
           )
@@ -50,8 +52,7 @@ export function MembershipPitch() {
             This is a preview of{" "}
             <span className="text-ink">{activeAuthorLabel}</span>'s cosmograph.
             Membership is <span className="text-ink">$7/year</span> and includes{" "}
-            <span className="text-ink">3 researchers</span> — add more anytime for
-            $1/year each.
+            <span className="text-ink">3 researchers</span>.
           </>
         )}
       </p>
