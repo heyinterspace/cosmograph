@@ -23,3 +23,21 @@ id = "OCOvbRZhRjeiP14OKnJJl"
 uri = "file://artifacts/cosmograph/public/logo.svg"
 type = "image"
 title = "Cosmograph logo — wide lockup"
+
+[[outputs]]
+id = "0_E-5VGudcTyKr0YdR5Be"
+uri = "file://artifacts/cosmograph/public/logo-mark.png"
+type = "image"
+title = "Cosmograph logo — transparent PNG (1024×1024)"
+
+[[outputs]]
+id = "OUk2Y2QlCu2Qn32Zc_hqG"
+uri = "file://artifacts/cosmograph/public/logo-mark.jpg"
+type = "image"
+title = "Cosmograph logo — JPG on dark background (1024×1024)"
+
+[[outputs]]
+id = "3g9wdjaddjbm8Z5sScqoS"
+uri = "file://artifacts/cosmograph/public/apple-touch-icon.png"
+type = "image"
+title = "App icon badge — PNG (180×180)"
