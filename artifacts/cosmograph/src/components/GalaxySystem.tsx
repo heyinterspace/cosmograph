@@ -557,6 +557,9 @@ export interface OrbitParams {
   node: number;
   initialAngle: number;
   speed: number;
+  spin: number;
+  spinPhase: number;
+  axialTilt: number;
   planetRadius: number;
   texIndex: number;
 }
@@ -688,6 +691,12 @@ export function rebuildLayout(): void {
       const node = prng() * Math.PI * 2;
       const initialAngle = prng() * Math.PI * 2;
       const speed = (0.4 + prng() * 0.5) / Math.sqrt(a);
+      // Per-planet spin so same-type planets aren't synchronized clones: a random
+      // start phase, a varied (mostly prograde) spin rate, and an axial tilt that
+      // also tips any rings off the shared flat plane.
+      const spinPhase = prng() * Math.PI * 2;
+      const spin = (0.08 + prng() * 0.2) * (prng() < 0.2 ? -1 : 1);
+      const axialTilt = (prng() - 0.5) * 0.6;
       const planetRadius = Math.min(
         8,
         Math.max(1.2, Math.sqrt(p.citations) * 0.16 + 1.2),
@@ -700,6 +709,9 @@ export function rebuildLayout(): void {
         node,
         initialAngle,
         speed,
+        spin,
+        spinPhase,
+        axialTilt,
         planetRadius,
         texIndex,
       };
@@ -884,7 +896,8 @@ export function GalaxySystem() {
       const theta = o.initialAngle + time * o.speed;
       const r = ellipseR(o.a, o.e, theta);
       ref.position.set(Math.cos(theta) * r, 0, Math.sin(theta) * r);
-      ref.rotation.y += 0.0025;
+      // Absolute (not accumulated) so each planet's phase + rate stays distinct.
+      ref.rotation.y = o.spinPhase + time * o.spin;
     }
   });
 
@@ -1215,6 +1228,7 @@ const PlanetSystem = React.memo(function PlanetSystem({
     <group rotation={[o.incl, o.node, 0]}>
       <primitive object={orbitLine} />
       <mesh
+        rotation-x={o.axialTilt}
         ref={(el: THREE.Mesh | null) => {
           if (el) planetRefs[paperId] = el;
         }}
@@ -1273,6 +1287,7 @@ const PlanetSystem = React.memo(function PlanetSystem({
             planetRadius={o.planetRadius}
             tex={ringTex}
             dimmed={dimmed}
+            seed={paperId}
           />
         )}
         {isSelected &&
@@ -1291,22 +1306,30 @@ const PlanetSystem = React.memo(function PlanetSystem({
   );
 });
 
+// Plausible ring tints (icy, golden, dusty, grey, faint rose) so ringed planets
+// aren't carbon copies. Multiplied onto the shared ring strip.
+const RING_TINTS = ["#efe6d2", "#d8e0ee", "#ead0b4", "#dcd7d0", "#e9d8e6"];
+
 // Saturn-style rings: a RingGeometry whose UVs are remapped so the radial axis
 // samples the 1-D ring strip (concentric ringlets), not the default flat-square
 // projection. The strip's baked alpha carries the gaps, so the material just
-// rides its transparency.
+// rides its transparency. Width, roll, tint, and opacity are all seeded per
+// planet so two ringed worlds never look identical.
 function SaturnRings({
   planetRadius,
   tex,
   dimmed,
+  seed,
 }: {
   planetRadius: number;
   tex: THREE.Texture;
   dimmed: boolean;
+  seed: string;
 }) {
-  const geo = useMemo(() => {
-    const inner = planetRadius * 1.35;
-    const outer = planetRadius * 2.5;
+  const { geo, tint, baseOpacity, roll } = useMemo(() => {
+    const rng = mulberry32(hashString(seed) ^ 0x5a17);
+    const inner = planetRadius * (1.26 + rng() * 0.2);
+    const outer = inner + planetRadius * (0.7 + rng() * 1.4);
     const g = new THREE.RingGeometry(inner, outer, 128, 1);
     const pos = g.attributes.position;
     const uv = g.attributes.uv;
@@ -1319,18 +1342,24 @@ function SaturnRings({
       uv.setXY(i, u, ang);
     }
     uv.needsUpdate = true;
-    return g;
-  }, [planetRadius]);
+    return {
+      geo: g,
+      tint: new THREE.Color(RING_TINTS[Math.floor(rng() * RING_TINTS.length)]),
+      baseOpacity: 0.78 + rng() * 0.2,
+      roll: (rng() - 0.5) * 0.8,
+    };
+  }, [planetRadius, seed]);
 
   useEffect(() => () => geo.dispose(), [geo]);
 
   return (
-    <mesh geometry={geo} rotation={[-Math.PI / 2.3, 0, 0]}>
+    <mesh geometry={geo} rotation={[-Math.PI / 2.3, 0, roll]}>
       <meshBasicMaterial
         map={tex}
+        color={tint}
         side={THREE.DoubleSide}
         transparent
-        opacity={dimmed ? 0.12 : 0.95}
+        opacity={dimmed ? 0.12 : baseOpacity}
         depthWrite={false}
       />
     </mesh>

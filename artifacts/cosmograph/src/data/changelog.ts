@@ -17,6 +17,17 @@ export interface ChangelogEntry {
  */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "3.12.0",
+    codename: "Tilted Rings",
+    date: "2026-06-25",
+    summary:
+      "Every planet now spins on its own tilted axis, and ringed worlds are no longer identical twins.",
+    changes: [
+      "Each planet gets its own axial tilt, spin direction, speed, and starting angle, so same-type worlds no longer rotate in lockstep like clones.",
+      "Ringed planets now vary their ring width, tilt, roll, tint, and opacity, so no two ringed worlds look exactly alike.",
+    ],
+  },
+  {
     version: "3.11.0",
     codename: "Spectral Worlds",
     date: "2026-06-24",
