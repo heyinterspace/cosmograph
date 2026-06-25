@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ClerkProvider, SignIn, SignUp, useClerk } from "@clerk/react";
 import { publishableKeyFromHost } from "@clerk/react/internal";
 import { Switch, Route, useLocation, Router as WouterRouter } from "wouter";
@@ -16,6 +16,9 @@ import { DatasetLoadingOverlay } from "@/components/DatasetLoadingOverlay";
 import { EntitlementBridge } from "@/components/EntitlementBridge";
 import { Paywall } from "@/components/Paywall";
 import { ScreenshotGate } from "@/components/ScreenshotGate";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { WebGLFallback } from "@/components/WebGLFallback";
+import { isWebGLAvailable } from "@/lib/webgl";
 
 // REQUIRED — copy verbatim. Resolves the key from window.location.hostname so the
 // same build serves multiple Clerk custom domains. Do not inline the env var, leave
@@ -121,11 +124,22 @@ function GalaxyView() {
 // or not. The default scientist is fully free; deep exploration of OTHER
 // searched scientists is gated by the paywall (see store + Paywall).
 function GalaxyHome() {
+  // Probe WebGL once on mount. If the browser/device can't render it, show the
+  // friendly fallback instead of mounting <Canvas> (which would throw and blank
+  // the page). The ErrorBoundary is the runtime safety net for everything else.
+  const [webglOk] = useState(isWebGLAvailable);
+
+  if (!webglOk) {
+    return <WebGLFallback variant="no-webgl" />;
+  }
+
   return (
-    <div className="w-screen h-[100dvh] bg-black text-foreground overflow-hidden relative font-sans">
-      <GalaxyView />
-      <DatasetLoadingOverlay />
-    </div>
+    <ErrorBoundary fallback={<WebGLFallback variant="error" />}>
+      <div className="w-screen h-[100dvh] bg-black text-foreground overflow-hidden relative font-sans">
+        <GalaxyView />
+        <DatasetLoadingOverlay />
+      </div>
+    </ErrorBoundary>
   );
 }
 
