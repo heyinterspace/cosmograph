@@ -14,6 +14,9 @@ export type Peer = {
 
 type Listener = () => void;
 
+// How long after a session opens before other cosmonauts fade in.
+const REVEAL_DELAY_MS = 9000;
+
 class PresenceClient {
   private ws: WebSocket | null = null;
   private readonly url: string;
@@ -22,6 +25,11 @@ class PresenceClient {
   private reconnectDelay = 1000;
   private reconnectTimer: number | null = null;
   private lastSendAt = 0;
+  // Grace period: after a session starts we hold peers back for a beat so a new
+  // arrival can orient before other cosmonauts fade in. `revealed` flips true
+  // once the timer elapses; the scene + headcount toast both gate on it.
+  private revealed = false;
+  private revealTimer: number | null = null;
 
   /** Live peer poses (excluding self). Read imperatively from the render loop. */
   peers = new Map<string, Peer>();
@@ -43,6 +51,15 @@ class PresenceClient {
   start(): void {
     if (this.shouldRun) return;
     this.shouldRun = true;
+    // Hold peers back for a grace period, then reveal them gracefully. Scheduled
+    // once per session (reconnects don't reset it); cleared in stop().
+    if (this.revealTimer === null && !this.revealed) {
+      this.revealTimer = window.setTimeout(() => {
+        this.revealTimer = null;
+        this.revealed = true;
+        this.emit();
+      }, REVEAL_DELAY_MS);
+    }
     this.connect();
   }
 
@@ -52,6 +69,11 @@ class PresenceClient {
       window.clearTimeout(this.reconnectTimer);
       this.reconnectTimer = null;
     }
+    if (this.revealTimer !== null) {
+      window.clearTimeout(this.revealTimer);
+      this.revealTimer = null;
+    }
+    this.revealed = false;
     if (this.ws) {
       this.ws.onclose = null;
       this.ws.onerror = null;
@@ -172,6 +194,8 @@ class PresenceClient {
 
   getCount = (): number => this.count;
   getPeerIds = (): string[] => this.peerIds;
+  /** Whether the post-arrival grace period has elapsed (peers may now show). */
+  getRevealed = (): boolean => this.revealed;
 
   private emit(): void {
     for (const l of this.listeners) l();

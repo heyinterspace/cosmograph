@@ -13,3 +13,4 @@
 - [Clerk auth-page logo](clerk-logo-img-fonts.md) — logoImageUrl renders as <img>, can't load webfonts; use a square self-contained mark, not a wide webfont-wordmark lockup.
 - [Stripe + stripe-replit-sync setup](stripe-replit-sync-setup.md) — connector secret is `settings.secret` (not `secret_key`); externalize `stripe-replit-sync` from esbuild or runMigrations silently skips table creation (empty `stripe` schema).
 - [Active scientist in URL](active-scientist-url.md) — explored author encoded as `?author=A123`; carry it through Stripe Checkout (sanitized into success/cancel_url) so redirects don't dump users on the default scientist.
+- [Cosmonaut presence ships](cosmonaut-ships.md) — peers + self render as low-poly ships; self in orbit is a small constant-apparent-size sprite (not a chase craft); ~9s reveal grace gate before peers/toast appear.

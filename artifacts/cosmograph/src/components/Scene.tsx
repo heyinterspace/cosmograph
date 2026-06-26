@@ -5,7 +5,7 @@ import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import * as THREE from "three";
 import { GalaxySystem } from "./GalaxySystem";
 import { CameraController, INTRO_START } from "./CameraControls";
-import { PresenceBroadcaster, PresenceWisps } from "./Presence";
+import { PresenceBroadcaster, PresencePeers, SelfShip } from "./Presence";
 import { useAppState } from "@/lib/store";
 import { setGalaxyCanvas } from "@/lib/share";
 
@@ -95,12 +95,13 @@ export function Scene({
           <CameraController captureTopDown={captureTopDown} />
           <SceneReady onReady={onReady} />
 
-          {introFinished && (
+          {!captureTopDown && introFinished && (
             <>
               <PresenceBroadcaster />
-              <PresenceWisps />
+              <PresencePeers />
             </>
           )}
+          {!captureTopDown && <SelfShip />}
 
           <EffectComposer enableNormalPass={false}>
             <Bloom

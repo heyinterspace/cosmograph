@@ -17,6 +17,18 @@ export interface ChangelogEntry {
  */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "3.13.0",
+    codename: "Squadron",
+    date: "2026-06-26",
+    summary:
+      "Other explorers now appear as little ships flying the galaxy with you — and you pilot your own.",
+    changes: [
+      "Fellow cosmonauts are now rendered as small low-poly ships that point the way they're flying, instead of faint glowing wisps.",
+      "New arrivals get a short grace period before others fade in, with a gentle 'More cosmonauts arriving' notice, so you can find your bearings first.",
+      "In orbit view your own ship now appears as a small glowing sprite among the galaxy — like the other cosmonauts — banking gently as you orbit.",
+    ],
+  },
+  {
     version: "3.12.0",
     codename: "Tilted Rings",
     date: "2026-06-25",

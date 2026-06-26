@@ -11,7 +11,10 @@ import { ChangelogDrawer } from "./ChangelogDrawer";
 import { CustomizeDrawer } from "./CustomizeDrawer";
 import { galaxyData } from "@/data/galaxy";
 import { presence } from "@/lib/presence";
-import { useSyncExternalStore } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
+import { toast } from "sonner";
+
+const EMPTY_IDS: string[] = [];
 
 export function Overlay() {
   const { introFinished, selectedObject, hoveredObject, tourActive } =
@@ -153,6 +156,30 @@ function LivePresence() {
     presence.getCount,
     () => 0,
   );
+  const revealed = useSyncExternalStore(
+    presence.subscribe,
+    presence.getRevealed,
+    () => false,
+  );
+  const peerIds = useSyncExternalStore(
+    presence.subscribe,
+    presence.getPeerIds,
+    () => EMPTY_IDS,
+  );
+  const announced = useRef(false);
+
+  // Announce other cosmonauts once they fade in after the grace period; re-arm
+  // when everyone leaves so the next wave gets its own toast.
+  useEffect(() => {
+    if (revealed && peerIds.length > 0 && !announced.current) {
+      announced.current = true;
+      toast("More cosmonauts arriving", {
+        description: "Other explorers are streaming the stars with you.",
+      });
+    }
+    if (peerIds.length === 0) announced.current = false;
+  }, [revealed, peerIds]);
+
   if (count < 1) return null;
   return (
     <div className="pointer-events-none mt-2 inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-ink-dim">
