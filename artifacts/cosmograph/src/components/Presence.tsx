@@ -6,13 +6,15 @@ import { useAppState } from "@/lib/store";
 import { ShipModel, SHIP_FORWARD } from "./Ship";
 
 const X_AXIS = new THREE.Vector3(1, 0, 0);
-const PEER_SCALE = 3.2;
+// Ship model is normalized to a 1-unit longest axis, so these scales are roughly
+// the ship's size in world units (kept deliberately small).
+const PEER_SCALE = 7;
 // Hide a peer ship once it's closer than this to the camera, so a passing
 // cosmonaut never balloons into a giant orb filling the view.
 const NEAR_CULL = 60;
 // The viewer's own ship rides at a fixed (zoom-independent) distance ahead of the
 // camera, so this is a constant apparent size — small, like a distant cosmonaut.
-const SELF_SCALE = 1.0;
+const SELF_SCALE = 4.5;
 const SELF_OFFSET = new THREE.Vector3(0, -12, -78);
 
 function hashId(id: string): number {
@@ -84,7 +86,7 @@ function PeerShip({ id }: { id: string }) {
 
   return (
     <group ref={ref} scale={0.001}>
-      <ShipModel color={color} />
+      <ShipModel variant="peer" glow glowColor={color} />
     </group>
   );
 }
@@ -185,7 +187,7 @@ export function SelfShip() {
 
   return (
     <group ref={ref} scale={0.001} renderOrder={10}>
-      <ShipModel color="#cfe8ff" opacity={0.85} glow />
+      <ShipModel variant="self" glow glowColor="#cfe8ff" />
     </group>
   );
 }

@@ -10,6 +10,7 @@ import { AppStateProvider, useAppState } from "@/lib/store";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Scene } from "@/components/Scene";
 import { Overlay } from "@/components/Overlay";
+import { AuthHandoff } from "@/components/AuthHandoff";
 import { Sidebar } from "@/components/Sidebar";
 import { FlyCockpit } from "@/components/FlyCockpit";
 import { DatasetLoadingOverlay } from "@/components/DatasetLoadingOverlay";
@@ -146,13 +147,15 @@ function GalaxyHome() {
 function SignInPage() {
   return (
     <div className="flex min-h-[100dvh] items-center justify-center bg-background px-4">
-      {/* path must be the full browser path — Clerk reads window.location.pathname directly */}
-      <SignIn
-        routing="path"
-        path={`${basePath}/sign-in`}
-        signUpUrl={`${basePath}/sign-up`}
-        forceRedirectUrl={basePath || "/"}
-      />
+      <AuthHandoff mode="sign-in">
+        {/* path must be the full browser path — Clerk reads window.location.pathname directly */}
+        <SignIn
+          routing="path"
+          path={`${basePath}/sign-in`}
+          signUpUrl={`${basePath}/sign-up`}
+          forceRedirectUrl={basePath || "/"}
+        />
+      </AuthHandoff>
     </div>
   );
 }
@@ -160,12 +163,14 @@ function SignInPage() {
 function SignUpPage() {
   return (
     <div className="flex min-h-[100dvh] items-center justify-center bg-background px-4">
-      <SignUp
-        routing="path"
-        path={`${basePath}/sign-up`}
-        signInUrl={`${basePath}/sign-in`}
-        forceRedirectUrl={basePath || "/"}
-      />
+      <AuthHandoff mode="sign-up">
+        <SignUp
+          routing="path"
+          path={`${basePath}/sign-up`}
+          signInUrl={`${basePath}/sign-in`}
+          forceRedirectUrl={basePath || "/"}
+        />
+      </AuthHandoff>
     </div>
   );
 }

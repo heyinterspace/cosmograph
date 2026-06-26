@@ -13,4 +13,6 @@
 - [Clerk auth-page logo](clerk-logo-img-fonts.md) — logoImageUrl renders as <img>, can't load webfonts; use a square self-contained mark, not a wide webfont-wordmark lockup.
 - [Stripe + stripe-replit-sync setup](stripe-replit-sync-setup.md) — connector secret is `settings.secret` (not `secret_key`); externalize `stripe-replit-sync` from esbuild or runMigrations silently skips table creation (empty `stripe` schema).
 - [Active scientist in URL](active-scientist-url.md) — explored author encoded as `?author=A123`; carry it through Stripe Checkout (sanitized into success/cancel_url) so redirects don't dump users on the default scientist.
+- [Poly Pizza GLB download](poly-pizza-glb.md) — page id ≠ file id; `static.poly.pizza/<page-id>.glb` is AccessDenied; scrape the page for the real UUID CDN url, verify `glTF` magic bytes.
+- [Iframe auth handoff](iframe-auth-handoff.md) — Clerk OAuth+bot-challenge split is an iframe-preview artifact; in-frame auth pages show a "open in new window" handoff, real widget renders top-level/prod.
 - [Cosmonaut presence ships](cosmonaut-ships.md) — peers + self render as low-poly ships; self in orbit is a small constant-apparent-size sprite (not a chase craft); ~9s reveal grace gate before peers/toast appear.

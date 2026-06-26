@@ -103,6 +103,10 @@ _Populate as you build — explicit user instructions worth remembering across s
 - **Artifact `id` intentionally stays `artifacts/galaxy`.** The web app's folder/package were renamed `galaxy`→`cosmograph`, but the artifact `id` in `artifacts/cosmograph/.replit-artifact/artifact.toml` remains `artifacts/galaxy` because `verifyAndReplaceArtifactToml` rejects id changes (`INVALID_ARTIFACT_ID`). It's an internal, never-user-visible handle; everything else (dir, `@workspace/cosmograph`, build/publicDir, workflow) points at `cosmograph`. Don't "fix" the id mismatch unless the platform adds id migration.
 - **Known doc gaps (not blockers):** repo has no `LICENSE` file despite being described as open-source, and `scripts/fetch-galaxy.mjs` still uses a placeholder OpenAlex `mailto`. Add a license and a real contact email before a public launch.
 
+## Credits
+
+- Spaceship 3D model (`artifacts/cosmograph/public/models/ship.glb`): "Spaceship" by **Quaternius** via Poly Pizza — https://poly.pizza/m/Jqfed124pQ — License **CC0 1.0** (public domain; attribution not required but included as good practice). Used for the presence "cosmonaut" ships.
+
 ## Pointers
 
 - See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details

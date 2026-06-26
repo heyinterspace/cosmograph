@@ -17,6 +17,17 @@ export interface ChangelogEntry {
  */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "3.14.0",
+    codename: "Dropship",
+    date: "2026-06-26",
+    summary:
+      "Cosmonauts now fly a real low-poly spaceship — smaller and sharper — and signing in from an embedded preview is no longer a maze.",
+    changes: [
+      "Every ship (yours and other cosmonauts') is now an actual low-poly spaceship model instead of a hand-built cone, and rides noticeably smaller in the galaxy.",
+      "Signing in from an embedded preview now offers a 'Continue in a new window' handoff, so the security check and Google/GitHub sign-in finish together in one place.",
+    ],
+  },
+  {
     version: "3.13.0",
     codename: "Squadron",
     date: "2026-06-26",

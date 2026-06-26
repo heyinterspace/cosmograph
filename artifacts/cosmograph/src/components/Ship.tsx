@@ -1,30 +1,15 @@
 import { useMemo } from "react";
+import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 
-// A small low-poly cosmonaut craft. The model is built so its NOSE points along
-// local +Z, which lets callers orient it with
-// `quaternion.setFromUnitVectors(FORWARD, dir)` for any heading.
+// A real low-poly spaceship model (CC0, "Spaceship" by Quaternius via Poly Pizza,
+// https://poly.pizza/m/Jqfed124pQ). The model's nose points local +Z, which lets
+// callers orient it with `quaternion.setFromUnitVectors(FORWARD, dir)`.
 export const SHIP_FORWARD = new THREE.Vector3(0, 0, 1);
 
-// Shared geometries — one set for every ship in the scene (peers + self), built
-// lazily on first use and kept for the app's lifetime. Nose baked toward +Z.
-let geos: {
-  body: THREE.ConeGeometry;
-  wing: THREE.BoxGeometry;
-  fin: THREE.BoxGeometry;
-  cockpit: THREE.SphereGeometry;
-} | null = null;
-
-function getGeometries() {
-  if (geos) return geos;
-  const body = new THREE.ConeGeometry(2.4, 10, 16);
-  body.rotateX(Math.PI / 2); // tip from +Y to +Z
-  const wing = new THREE.BoxGeometry(12, 0.5, 3.4);
-  const fin = new THREE.BoxGeometry(0.5, 3.4, 3);
-  const cockpit = new THREE.SphereGeometry(1.3, 12, 12);
-  geos = { body, wing, fin, cockpit };
-  return geos;
-}
+const MODEL_URL = `${import.meta.env.BASE_URL}models/ship.glb`;
+const MESH_NAME = "Spaceship_FernandoTheFlamingo";
+const MATERIAL_NAME = "Atlas";
 
 // Soft radial glow sprite for the engine plume / distance halo.
 let glowTexture: THREE.Texture | null = null;
@@ -53,64 +38,89 @@ export function getGlowTexture(): THREE.Texture {
   return glowTexture;
 }
 
+// Shared material variants, derived once from the loaded model material. The
+// galaxy is very dark, so we self-illuminate the texture (emissiveMap) a touch
+// to keep ships readable. "self" is semi-transparent so the viewer's own ship
+// never occludes the UI.
+let sharedMats: { peer: THREE.Material; self: THREE.Material } | null = null;
+function getMaterials(base: THREE.MeshStandardMaterial) {
+  if (sharedMats) return sharedMats;
+  const peer = base.clone();
+  peer.emissiveMap = base.map;
+  peer.emissive = new THREE.Color("#ffffff");
+  peer.emissiveIntensity = 0.35;
+  const self = peer.clone();
+  self.transparent = true;
+  self.opacity = 0.55;
+  self.depthWrite = false;
+  sharedMats = { peer, self };
+  return sharedMats;
+}
+
 /**
- * A single ship. Nose points local +Z. `opacity` < 1 makes it semi-transparent
- * (used for the viewer's own chase ship so it never occludes the UI); `glow`
- * adds an additive engine halo so distant peers still read as a point of light.
+ * One spaceship. Normalized so its longest dimension is 1 unit and centered at
+ * the origin, so callers can size it purely via the parent group's scale and
+ * rotate it about its own center. `variant="self"` is the translucent own-ship;
+ * `glow` adds an additive engine halo tinted `glowColor`.
  */
 export function ShipModel({
-  color = "#9ec5ff",
-  opacity = 1,
+  variant = "peer",
   glow = true,
+  glowColor = "#9ec5ff",
 }: {
-  color?: string;
-  opacity?: number;
+  variant?: "peer" | "self";
   glow?: boolean;
+  glowColor?: string;
 }) {
-  const g = getGeometries();
-  const semi = opacity < 1;
+  const { nodes, materials } = useGLTF(MODEL_URL) as unknown as {
+    nodes: Record<string, THREE.Mesh>;
+    materials: Record<string, THREE.MeshStandardMaterial>;
+  };
 
-  const hullMat = useMemo(() => {
-    const m = new THREE.MeshStandardMaterial({
-      color,
-      metalness: 0.35,
-      roughness: 0.45,
-      emissive: new THREE.Color(color),
-      emissiveIntensity: 0.35,
-      transparent: semi,
-      opacity,
-      depthWrite: !semi,
-    });
-    return m;
-  }, [color, opacity, semi]);
+  const meshNode = nodes[MESH_NAME];
+  const baseMaterial = materials[MATERIAL_NAME];
+  if (!meshNode || !baseMaterial) {
+    throw new Error(
+      `Ship GLB is missing expected node "${MESH_NAME}" or material "${MATERIAL_NAME}" — the model at ${MODEL_URL} may have changed.`,
+    );
+  }
 
-  const glassMat = useMemo(() => {
-    const m = new THREE.MeshStandardMaterial({
-      color: "#bfe8ff",
-      emissive: new THREE.Color("#bfe8ff"),
-      emissiveIntensity: 0.5,
-      metalness: 0.1,
-      roughness: 0.2,
-      transparent: semi,
-      opacity: semi ? opacity * 1.1 : 1,
-      depthWrite: !semi,
-    });
-    return m;
-  }, [opacity, semi]);
+  const geometry = meshNode.geometry;
+  const mats = getMaterials(baseMaterial);
+  const material = variant === "self" ? mats.self : mats.peer;
+
+  // Normalize: scale so the longest axis is 1, and offset so the model is
+  // centered on the origin. The geometry is shared across every ship, so only
+  // the first mount computes the bounding box; later mounts reuse it.
+  const norm = useMemo(() => {
+    if (!geometry.boundingBox) geometry.computeBoundingBox();
+    const box = geometry.boundingBox!;
+    const size = new THREE.Vector3();
+    const center = new THREE.Vector3();
+    box.getSize(size);
+    box.getCenter(center);
+    const k = 1 / Math.max(size.x, size.y, size.z);
+    return {
+      k,
+      offset: [-center.x * k, -center.y * k, -center.z * k] as const,
+    };
+  }, [geometry]);
 
   return (
     <group>
-      <mesh geometry={g.body} material={hullMat} />
-      <mesh geometry={g.wing} material={hullMat} position={[0, -0.2, -2]} />
-      <mesh geometry={g.fin} material={hullMat} position={[0, 1.4, -3.2]} />
-      <mesh geometry={g.cockpit} material={glassMat} position={[0, 0.5, 1.4]} />
+      <mesh
+        geometry={geometry}
+        material={material}
+        scale={norm.k}
+        position={norm.offset}
+      />
       {glow && (
-        <sprite position={[0, 0, -5.5]} scale={[9, 9, 9]}>
+        <sprite position={[0, 0, -0.55]} scale={[1, 1, 1]}>
           <spriteMaterial
             map={getGlowTexture()}
-            color={color}
+            color={glowColor}
             transparent
-            opacity={0.85 * opacity}
+            opacity={variant === "self" ? 0.6 : 0.8}
             depthWrite={false}
             blending={THREE.AdditiveBlending}
             toneMapped={false}
@@ -120,3 +130,5 @@ export function ShipModel({
     </group>
   );
 }
+
+useGLTF.preload(MODEL_URL);
