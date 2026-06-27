@@ -72,6 +72,11 @@ type ConsoleItem =
       Icon: IconType;
       onClick: () => void;
       active?: boolean;
+      /** A panel/drawer this button opens is currently open. Distinct from
+       *  `active` (a persistent mode like a camera view): rendered as an accent
+       *  outline + dot rather than the solid mode fill, so an open panel and an
+       *  active mode can both read as "on" without looking identical. */
+      open?: boolean;
       locked?: boolean;
       accent?: boolean;
       paidTag?: boolean;
@@ -118,9 +123,13 @@ export function Sidebar() {
     cameraMode,
     filters,
     setInfoOpen,
+    infoOpen,
     setAskOpen,
+    askOpen,
     setChangelogOpen,
+    changelogOpen,
     setCustomizeOpen,
+    customizeOpen,
     replayIntro,
     startTour,
     canExplore,
@@ -159,6 +168,7 @@ export function Sidebar() {
           label: "Info",
           Icon: Info,
           onClick: () => setInfoOpen(true),
+          open: infoOpen,
         },
         {
           kind: "action",
@@ -167,6 +177,7 @@ export function Sidebar() {
           Icon: Rocket,
           animated: RocketIcon,
           onClick: () => setChangelogOpen(true),
+          open: changelogOpen,
         },
         {
           kind: "action",
@@ -175,6 +186,7 @@ export function Sidebar() {
           railLabel: "Ask",
           Icon: MessageCircleStar,
           onClick: () => setAskOpen(true),
+          open: askOpen,
           active: filtersActive,
           activeIconClass: "text-accent",
         },
@@ -195,6 +207,7 @@ export function Sidebar() {
           Icon: Telescope,
           animated: TelescopeIcon,
           onClick: () => setCustomizeOpen(true),
+          open: customizeOpen,
           paidTag: true,
           trailing: Sparkles,
           tooltip: "Choose researcher for cosmograph",
@@ -487,12 +500,16 @@ function ExpandedItem({ item }: { item: ConsoleItem }) {
       <button
         type="button"
         onClick={handleClick}
+        aria-pressed={item.open}
         className={
           item.accent
-            ? "flex h-9 w-full items-center gap-2 border-2 border-accent bg-accent/20 px-3 text-white transition-all hover:bg-accent/30"
-            : "flex h-9 w-full items-center gap-2 border-2 border-edge bg-white/5 px-3 text-ink transition-all hover:bg-white/10"
+            ? "relative flex h-9 w-full items-center gap-2 border-2 border-accent bg-accent/20 px-3 text-white transition-all hover:bg-accent/30"
+            : item.open
+              ? "relative flex h-9 w-full items-center gap-2 border-2 border-accent bg-accent/10 px-3 text-ink transition-all hover:bg-accent/20"
+              : "relative flex h-9 w-full items-center gap-2 border-2 border-edge bg-white/5 px-3 text-ink transition-all hover:bg-white/10"
         }
       >
+        {item.open && <OpenDot />}
         {renderIcon(14, "shrink-0 text-white")}
         <span className="font-display text-[11px] uppercase tracking-wider">
           {item.label}
@@ -525,10 +542,24 @@ function ExpandedItem({ item }: { item: ConsoleItem }) {
   return (
     <ConsoleButton
       active={item.active}
+      open={item.open}
       onClick={handleClick}
       locked={item.locked}
       icon={renderIcon(14, item.active ? item.activeIconClass : undefined)}
       label={item.label}
+    />
+  );
+}
+
+// Small accent dot marking a button whose panel/drawer is currently open. Sits
+// in the top-left corner so it never collides with a trailing PaidTag/icon. This
+// is deliberately NOT the solid mode fill (Orbit/Fly) — an open panel and an
+// active camera mode are different kinds of "on" and should read differently.
+function OpenDot() {
+  return (
+    <span
+      aria-hidden
+      className="absolute left-1 top-1 h-1.5 w-1.5 rounded-full bg-accent shadow-[0_0_6px_var(--accent)]"
     />
   );
 }
@@ -567,10 +598,12 @@ function RailItem({ item }: { item: ConsoleItem }) {
     );
   }
 
-  // action — neutral, no active/accent in the collapsed rail
+  // action — neutral in the collapsed rail except for an "open panel" dot, so
+  // you can still tell which drawer is open while the console is collapsed.
   const { Icon } = item;
   return (
     <RailButton
+      open={item.open}
       onClick={() => {
         animRef.current?.startAnimation();
         item.onClick();
@@ -735,29 +768,37 @@ function OrbitControl({
 
 function ConsoleButton({
   active = false,
+  open = false,
   onClick,
   icon,
   label,
   locked = false,
 }: {
   active?: boolean;
+  open?: boolean;
   onClick: () => void;
   icon: React.ReactNode;
   label: string;
   locked?: boolean;
 }) {
+  // `active` (a persistent mode) wins the solid fill; an `open` panel that isn't
+  // an active mode gets a lighter accent outline + dot so the two read apart.
+  const openOnly = open && !active;
   return (
     <button
       onClick={onClick}
-      aria-pressed={active}
+      aria-pressed={active || open}
       title={locked ? `${label} — unlock to explore` : label}
       style={active ? { background: "var(--accent)" } : undefined}
-      className={`flex w-full items-center gap-2 border-2 border-edge px-3 py-2 text-[11px] font-display uppercase tracking-wider transition-all ${
+      className={`relative flex w-full items-center gap-2 border-2 px-3 py-2 text-[11px] font-display uppercase tracking-wider transition-all ${
         active
-          ? "text-accent-foreground"
-          : "bg-white/5 text-ink hover:bg-white/10"
+          ? "border-edge text-accent-foreground"
+          : openOnly
+            ? "border-accent bg-accent/10 text-ink hover:bg-accent/20"
+            : "border-edge bg-white/5 text-ink hover:bg-white/10"
       }`}
     >
+      {openOnly && <OpenDot />}
       {icon}
       {label}
       {locked && <Lock size={11} className="ml-auto opacity-70" />}
@@ -799,32 +840,38 @@ function RailTip({
 
 function RailButton({
   active = false,
+  open = false,
   onClick,
   label,
   children,
   locked = false,
 }: {
   active?: boolean;
+  open?: boolean;
   onClick: () => void;
   label: string;
   children: React.ReactNode;
   locked?: boolean;
 }) {
   const tip = locked ? `${label} — unlock to explore` : label;
+  const openOnly = open && !active;
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <button
           onClick={onClick}
-          aria-pressed={active}
+          aria-pressed={active || open}
           aria-label={tip}
           style={active ? { background: "var(--accent)" } : undefined}
-          className={`relative flex h-9 w-9 items-center justify-center border-2 border-edge transition-all ${
+          className={`relative flex h-9 w-9 items-center justify-center border-2 transition-all ${
             active
-              ? "text-accent-foreground"
-              : "bg-white/5 text-ink hover:bg-white/10"
+              ? "border-edge text-accent-foreground"
+              : openOnly
+                ? "border-accent bg-accent/10 text-ink hover:bg-accent/20"
+                : "border-edge bg-white/5 text-ink hover:bg-white/10"
           }`}
         >
+          {openOnly && <OpenDot />}
           {children}
           {locked && (
             <span className="absolute -right-1 -top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-accent text-accent-foreground">
