@@ -260,7 +260,7 @@ export function Sidebar() {
         {
           kind: "action",
           id: "replay",
-          label: "Replay",
+          label: "Re-intro",
           Icon: Rewind,
           onClick: replayIntro,
         },
