@@ -5,6 +5,7 @@ import billingRouter from "./billing";
 import shipRouter from "./ship";
 import askRouter from "./ask";
 import feedbackRouter from "./feedback";
+import referralRouter from "./referral";
 
 const router: IRouter = Router();
 
@@ -14,5 +15,6 @@ router.use(billingRouter);
 router.use(shipRouter);
 router.use(askRouter);
 router.use(feedbackRouter);
+router.use(referralRouter);
 
 export default router;

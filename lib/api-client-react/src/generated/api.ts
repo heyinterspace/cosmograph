@@ -24,12 +24,14 @@ import type {
   AskRequest,
   CheckoutRequest,
   CheckoutSession,
+  ClaimReferralRequest,
   ConfirmRequest,
   Entitlement,
   Error,
   FeedbackRequest,
   FeedbackResult,
   HealthStatus,
+  ReferralInfo,
   SaveShipRequest,
   ShipState,
   UnlockRequest
@@ -573,6 +575,158 @@ export const useSaveShip = <TError = ErrorType<Error>,
         TContext
       > => {
       return useMutation(getSaveShipMutationOptions(options));
+    }
+
+export const getGetReferralUrl = () => {
+
+
+
+
+  return `/api/me/referral`
+}
+
+/**
+ * Returns the signed-in account's stable referral code and how many accounts have signed up through their link. The code is generated on first call and is permanent.
+
+ * @summary The signed-in account's referral link info
+ */
+export const getReferral = async ( options?: RequestInit): Promise<ReferralInfo> => {
+
+  return customFetch<ReferralInfo>(getGetReferralUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetReferralQueryKey = () => {
+    return [
+    `/api/me/referral`
+    ] as const;
+    }
+
+
+export const getGetReferralQueryOptions = <TData = Awaited<ReturnType<typeof getReferral>>, TError = ErrorType<Error>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getReferral>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetReferralQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getReferral>>> = ({ signal }) => getReferral({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getReferral>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetReferralQueryResult = NonNullable<Awaited<ReturnType<typeof getReferral>>>
+export type GetReferralQueryError = ErrorType<Error>
+
+
+/**
+ * @summary The signed-in account's referral link info
+ */
+
+export function useGetReferral<TData = Awaited<ReturnType<typeof getReferral>>, TError = ErrorType<Error>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getReferral>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetReferralQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getClaimReferralUrl = () => {
+
+
+
+
+  return `/api/me/referral/claim`
+}
+
+/**
+ * Called right after sign-up with a referral code captured from a `?ref=` link. Attributes this account to the referrer — but only for genuinely new accounts and only once (the attribution is permanent). Safe to call when ineligible: it simply returns the account's own referral info unchanged.
+
+ * @summary Attribute the signed-in (newly created) account to a referrer
+ */
+export const claimReferral = async (claimReferralRequest: ClaimReferralRequest, options?: RequestInit): Promise<ReferralInfo> => {
+
+  return customFetch<ReferralInfo>(getClaimReferralUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      claimReferralRequest,)
+  }
+);}
+
+
+
+
+export const getClaimReferralMutationOptions = <TError = ErrorType<Error>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimReferral>>, TError,{data: BodyType<ClaimReferralRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof claimReferral>>, TError,{data: BodyType<ClaimReferralRequest>}, TContext> => {
+
+const mutationKey = ['claimReferral'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof claimReferral>>, {data: BodyType<ClaimReferralRequest>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  claimReferral(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ClaimReferralMutationResult = NonNullable<Awaited<ReturnType<typeof claimReferral>>>
+    export type ClaimReferralMutationBody = BodyType<ClaimReferralRequest>
+    export type ClaimReferralMutationError = ErrorType<Error>
+
+    /**
+ * @summary Attribute the signed-in (newly created) account to a referrer
+ */
+export const useClaimReferral = <TError = ErrorType<Error>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimReferral>>, TError,{data: BodyType<ClaimReferralRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof claimReferral>>,
+        TError,
+        {data: BodyType<ClaimReferralRequest>},
+        TContext
+      > => {
+      return useMutation(getClaimReferralMutationOptions(options));
     }
 
 export const getTranslateAskUrl = () => {

@@ -16,6 +16,7 @@ import { FlyCockpit } from "@/components/FlyCockpit";
 import { DatasetLoadingOverlay } from "@/components/DatasetLoadingOverlay";
 import { EntitlementBridge } from "@/components/EntitlementBridge";
 import { ShipBridge } from "@/components/ShipBridge";
+import { ReferralBridge } from "@/components/ReferralBridge";
 import { Paywall } from "@/components/Paywall";
 import { ScreenshotGate } from "@/components/ScreenshotGate";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -232,6 +233,7 @@ function ClerkProviderWithRoutes() {
           <DocumentTitle />
           <EntitlementBridge />
           <ShipBridge />
+          <ReferralBridge />
           <Switch>
             <Route path="/" component={GalaxyHome} />
             {/* REQUIRED — copy "/sign-in/*?" and "/sign-up/*?" verbatim. The /*? optional

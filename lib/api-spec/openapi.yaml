@@ -206,6 +206,64 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /me/referral:
+    get:
+      operationId: getReferral
+      tags: [referral]
+      summary: The signed-in account's referral link info
+      description: >
+        Returns the signed-in account's stable referral code and how many
+        accounts have signed up through their link. The code is generated on
+        first call and is permanent.
+      responses:
+        "200":
+          description: The account's referral code and signup count
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReferralInfo"
+        "401":
+          description: Not signed in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /me/referral/claim:
+    post:
+      operationId: claimReferral
+      tags: [referral]
+      summary: Attribute the signed-in (newly created) account to a referrer
+      description: >
+        Called right after sign-up with a referral code captured from a `?ref=`
+        link. Attributes this account to the referrer — but only for genuinely
+        new accounts and only once (the attribution is permanent). Safe to call
+        when ineligible: it simply returns the account's own referral info
+        unchanged.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClaimReferralRequest"
+      responses:
+        "200":
+          description: The account's own referral info after the best-effort claim
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReferralInfo"
+        "400":
+          description: Missing referral code
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Not signed in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /ask/translate:
     post:
       operationId: translateAsk
@@ -476,6 +534,26 @@ components:
       required:
         - url
         - number
+    ReferralInfo:
+      type: object
+      properties:
+        code:
+          type: string
+          description: The account's stable referral code, used as `?ref=<code>`.
+        referredCount:
+          type: integer
+          description: How many accounts have signed up through this account's link.
+      required:
+        - code
+        - referredCount
+    ClaimReferralRequest:
+      type: object
+      properties:
+        code:
+          type: string
+          description: The referral code captured from the `?ref=` link at sign-up.
+      required:
+        - code
     Error:
       type: object
       properties:

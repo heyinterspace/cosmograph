@@ -17,6 +17,18 @@ export interface ChangelogEntry {
  */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "3.17.0",
+    codename: "Wayfinder",
+    date: "2026-06-27",
+    summary:
+      "Sign in and you get your own invite link — bring fellow explorers into the galaxy and we'll keep count.",
+    changes: [
+      "Every signed-in explorer now has a personal invite link, found in the Share panel — copy it and send it to anyone.",
+      "When someone signs up through your link for the first time, they're counted as your referral, permanently.",
+      "Not signed in? The Share panel now invites you to create a free account so you can get your own link too.",
+    ],
+  },
+  {
     version: "3.16.0",
     codename: "Hangar",
     date: "2026-06-26",

@@ -104,6 +104,32 @@ export const SaveShipResponse = zod.object({
 
 
 /**
+ * Returns the signed-in account's stable referral code and how many accounts have signed up through their link. The code is generated on first call and is permanent.
+
+ * @summary The signed-in account's referral link info
+ */
+export const GetReferralResponse = zod.object({
+  "code": zod.string().describe('The account\'s stable referral code, used as `?ref=<code>`.'),
+  "referredCount": zod.number().describe('How many accounts have signed up through this account\'s link.')
+})
+
+
+/**
+ * Called right after sign-up with a referral code captured from a `?ref=` link. Attributes this account to the referrer — but only for genuinely new accounts and only once (the attribution is permanent). Safe to call when ineligible: it simply returns the account's own referral info unchanged.
+
+ * @summary Attribute the signed-in (newly created) account to a referrer
+ */
+export const ClaimReferralBody = zod.object({
+  "code": zod.string().describe('The referral code captured from the `?ref=` link at sign-up.')
+})
+
+export const ClaimReferralResponse = zod.object({
+  "code": zod.string().describe('The account\'s stable referral code, used as `?ref=<code>`.'),
+  "referredCount": zod.number().describe('How many accounts have signed up through this account\'s link.')
+})
+
+
+/**
  * Uses the LLM purely as a translator: it converts a plain-English question about a scientist's corpus into a validated, structured query spec. The model never computes counts or lists — the browser runs the returned spec deterministically over the locally-baked data. Only the question text and a description of the data shape are sent; no actual paper data leaves the browser.
 
  * @summary Translate a natural-language question into a structured query spec

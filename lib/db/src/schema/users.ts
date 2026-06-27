@@ -23,6 +23,14 @@ export const usersTable = pgTable("users", {
   // a member's chosen ship follow them across devices and be broadcast to other
   // cosmonauts in real time. Null until the account saves one.
   shipSeed: text("ship_seed"),
+  // Referrals: every account gets a stable short code used as `?ref=<code>`.
+  // When a brand-new account signs up through someone's link, `referredBy` is
+  // set once (permanently) to that referrer's account id, and `referredAt`
+  // records when. A signup is the unit we count — see the api-server referral
+  // lib, which only attributes genuinely new (recently created) accounts.
+  referralCode: text("referral_code").unique(),
+  referredBy: text("referred_by"),
+  referredAt: timestamp("referred_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

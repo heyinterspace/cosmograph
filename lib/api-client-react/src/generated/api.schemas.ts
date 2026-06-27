@@ -168,6 +168,18 @@ export interface FeedbackResult {
   number: number;
 }
 
+export interface ReferralInfo {
+  /** The account's stable referral code, used as `?ref=<code>`. */
+  code: string;
+  /** How many accounts have signed up through this account's link. */
+  referredCount: number;
+}
+
+export interface ClaimReferralRequest {
+  /** The referral code captured from the `?ref=` link at sign-up. */
+  code: string;
+}
+
 export interface Error {
   error: string;
 }

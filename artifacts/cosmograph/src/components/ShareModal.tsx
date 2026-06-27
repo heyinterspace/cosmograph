@@ -9,6 +9,7 @@ import {
   canNativeShareFiles,
   nativeShareCard,
 } from "@/lib/share";
+import { InviteSection } from "./InviteSection";
 
 export function ShareModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -201,6 +202,8 @@ export function ShareModal({ open, onClose }: { open: boolean; onClose: () => vo
                   </button>
                 )}
               </div>
+
+              <InviteSection open={open} />
             </motion.div>
           </div>
         </motion.div>
