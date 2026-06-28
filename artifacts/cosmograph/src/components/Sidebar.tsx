@@ -292,13 +292,16 @@ function CameraToggle() {
   const { cameraMode, setCameraMode, canExplore } = useAppState();
   const isFly = cameraMode === "spaceship";
   return (
-    <div className="relative flex w-full overflow-hidden border-2 border-edge bg-white/5 backdrop-blur-sm">
+    <div className="relative flex w-full transform-gpu overflow-hidden border-2 border-edge bg-white/5 backdrop-blur-sm">
       {/* Sliding glass thumb — a single accent pane that travels between the two
           halves, so switching modes reads as one moving surface rather than two
-          buttons swapping fills (Structured Liquidity, sharp 90° corners). */}
+          buttons swapping fills (Structured Liquidity, sharp 90° corners).
+          NB: no backdrop-filter here — a child with its own backdrop-filter
+          intermittently escapes the parent's `overflow-hidden` clip in Chrome,
+          letting the accent glow bleed past the top/bottom edges. */}
       <motion.span
         aria-hidden
-        className="pointer-events-none absolute inset-y-0 left-0 z-0 w-1/2 border border-accent/45 bg-accent/25 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_0_14px_rgba(163,136,238,0.4)] backdrop-blur-md"
+        className="pointer-events-none absolute inset-y-0 left-0 z-0 w-1/2 border border-accent/45 bg-accent/25 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_0_14px_rgba(163,136,238,0.4)]"
         initial={false}
         animate={{ x: isFly ? "100%" : "0%" }}
         transition={{ type: "spring", stiffness: 460, damping: 38, mass: 0.7 }}
