@@ -14,7 +14,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { presence } from "@/lib/presence";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { toast } from "sonner";
-import { Github, Heart, Share2, Star } from "lucide-react";
+import { ExternalLink, Github, Heart, Share2, Star } from "lucide-react";
 import { useGithubStars, formatStars } from "@/lib/useGithubStars";
 import { SITE } from "@/config/site";
 import { ShareModal } from "./ShareModal";
@@ -178,6 +178,7 @@ function HeaderActions() {
         <span className="font-display text-[11px] uppercase tracking-wider">
           Sponsor
         </span>
+        <ExternalLink size={12} className="shrink-0 text-ink-dim" />
       </a>
       <a
         href={url ?? SITE.github.url}
