@@ -74,7 +74,7 @@ export function Overlay() {
 
               <AnimatePresence>
                 {selectedObject && (
-                  <div className="absolute z-30 inset-x-3 bottom-24 max-h-[38vh] md:inset-x-auto md:bottom-auto md:top-36 md:left-5 md:w-[min(384px,calc(100vw-2.5rem))] md:max-h-[calc(100vh-15rem)] md:!block overflow-y-auto custom-scrollbar pointer-events-auto block">
+                  <div className="absolute z-30 left-3 right-[4.5rem] bottom-20 max-h-[42vh] md:inset-x-auto md:right-auto md:bottom-auto md:top-36 md:left-5 md:w-[min(384px,calc(100vw-2.5rem))] md:max-h-[calc(100vh-15rem)] md:!block overflow-y-auto custom-scrollbar pointer-events-auto block">
                     <DetailPanel />
                   </div>
                 )}
@@ -98,7 +98,13 @@ export function Overlay() {
 function Header() {
   const { stats } = galaxyData;
   return (
-    <div className="absolute top-0 left-0 p-6">
+    <div
+      className="absolute top-0 left-0 p-6 pr-16 pb-10"
+      style={{
+        background:
+          "radial-gradient(130% 130% at 0% 0%, rgba(8,9,13,0.82) 0%, rgba(8,9,13,0.5) 40%, transparent 72%)",
+      }}
+    >
       <div className="flex items-center gap-2.5">
         <img
           src={`${import.meta.env.BASE_URL}logo-mark.svg`}
@@ -110,7 +116,7 @@ function Header() {
           Cosmograph
         </h1>
       </div>
-      <p className="pointer-events-none text-ink-dim font-mono text-[11px] mt-1 uppercase tracking-widest">
+      <p className="pointer-events-none text-ink/75 font-mono text-[11px] mt-1 uppercase tracking-[0.12em]">
         Scientific Work at Galactic Scale · {galaxyData.author.name}
       </p>
       <div className="pointer-events-none mt-3 flex flex-wrap gap-x-4 gap-y-1">

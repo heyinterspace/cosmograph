@@ -25,6 +25,12 @@ The "NASA-grade" sun/planet realism is built entirely from stock `meshStandardMa
 ## Cloud PNG: use map alpha, NOT alphaMap
 For the Earth cloud layer, set the cloud PNG as `map` with `transparent` and rely on the texture's own alpha channel. Do NOT also set it as `alphaMap`. **Why:** three.js `alphaMap` samples the **green** channel; a white-cloud PNG has green≈1 everywhere, so an `alphaMap` makes the whole cloud sphere opaque and wraps Earth in a solid white shell.
 
+## Panel text (`.paper-ink`) is light + crisp dark shadow — do NOT restore the dark-grey + light-halo
+`.paper-ink` (paper/domain titles on glass panels) must be a light ink (`#f3f4f8`) with a tight dark `text-shadow`, never the old dark-grey `#30323c` + soft light halo. **Why:** the dark-text + 5px light-halo combo (a deliberate "readable on bright sun-wash" hack, with an explanatory CSS comment) read as **blurry/low-contrast on phones** — a direct user complaint. The bright-sun-wash worry is already handled by the glass backdrop's `brightness(0.6)`, so light text on the darkened panel is both crisp and safe. The old comment may tempt a future agent to revert; don't.
+
+## Console (right rail) defaults collapsed on phones; detail panel reserves the rail width
+On viewports `<768px` the console starts as the collapsed `w-14` rail (see `isCompactViewport()` in `store.tsx`), not the expanded panel, and intro-finish does not auto-open it. The mobile detail panel uses `right-[4.5rem]` (72px) to clear the 56px rail, reset by `md:right-auto`. **Why:** the expanded panel covered most of a phone and hid/occluded the detail panel — a user complaint. **How to apply:** reading `window.innerWidth` at call time (guarded by `typeof window`) is intentional — no resize listener, evaluated at mount.
+
 ## Orbits must read as orbits, not a belt
 Planet placement is per-paper deterministic (seeded from paper id): distinct elliptical + inclined orbits with visible orbit-path rings, spaced with increasing radius. **Why:** earlier linear/clustered placement looked like an asteroid belt; the user explicitly wanted real planetary systems.
 

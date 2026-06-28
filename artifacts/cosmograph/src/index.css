@@ -110,15 +110,15 @@
   text-shadow: 0 0 20px currentColor;
 }
 
-/* Paper/title text on the floating glass panels. The panels normally read dark,
-   but a bloomed sun drifting behind a translucent panel washes that area bright,
-   which made the old near-white text vanish. No single fixed gray is high-contrast
-   on BOTH a dark panel and a bright wash, so this pairs a genuinely dark gray
-   (reads against the bright wash) with a faint light halo (keeps the same dark
-   text legible against the dark panel). */
+/* Paper/title text on the floating glass panels. Light, high-contrast ink with a
+   crisp dark shadow (not a soft glow) so it stays sharp and legible on both the
+   dark panel and the rare bright sun-wash behind the glass. The earlier dark-grey
+   + light-halo combo read as blurry on small screens. */
 .paper-ink {
-  color: #30323c;
-  text-shadow: 0 0 5px rgba(233, 235, 243, 0.5);
+  color: #f3f4f8;
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.9),
+    0 0 1px rgba(0, 0, 0, 0.95);
 }
 
 .glass-panel {

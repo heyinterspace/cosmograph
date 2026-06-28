@@ -158,6 +158,14 @@ function clearIntroSeen() {
   }
 }
 
+// Phones (narrow viewports) keep the console as a collapsed rail by default so
+// the expanded panel doesn't cover most of the screen. Read at call time so it
+// reflects the live viewport without a resize listener.
+function isCompactViewport(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.innerWidth < 768;
+}
+
 export function AppStateProvider({ children }: { children: ReactNode }) {
   const introSeen = readIntroSeen();
   const [introFinished, setIntroFinishedState] = useState(introSeen);
@@ -165,13 +173,16 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const introProgressRef = useRef(introSeen ? 1 : 0);
   // Console starts collapsed while the intro/title screen plays so it never
   // covers it; it auto-opens once the intro finishes. Returning visitors (intro
-  // already seen) get the console open immediately.
-  const [consoleOpen, setConsoleOpen] = useState(introSeen);
+  // already seen) get the console open immediately — except on phones, where the
+  // expanded panel would cover most of the narrow screen, so it stays a rail.
+  const [consoleOpen, setConsoleOpen] = useState(
+    introSeen && !isCompactViewport(),
+  );
 
   const setIntroFinished = useCallback((val: boolean) => {
     if (val) writeIntroSeen();
     setIntroFinishedState(val);
-    if (val) setConsoleOpen(true);
+    if (val && !isCompactViewport()) setConsoleOpen(true);
   }, []);
 
   const replayIntro = useCallback(() => {

@@ -17,6 +17,19 @@ export interface ChangelogEntry {
  */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "3.18.0",
+    codename: "Pocket Cosmos",
+    date: "2026-06-28",
+    summary:
+      "A big pass on the phone experience — clearer text, a console that stays out of the way, and detail panels that fit the screen.",
+    changes: [
+      "Paper and domain text is now crisp and high-contrast instead of a soft glow that read as blurry on phones.",
+      "On phones the console now starts as a slim rail instead of the full panel, so it no longer covers the galaxy.",
+      "Detail panels no longer slide under the console and are sized to fit a phone screen.",
+      "Added a subtle backdrop behind the title and stats so they stay readable over bright stars.",
+    ],
+  },
+  {
     version: "3.17.0",
     codename: "Wayfinder",
     date: "2026-06-27",
