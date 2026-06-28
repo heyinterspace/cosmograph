@@ -194,7 +194,7 @@ export function Sidebar() {
             ? `console-panel absolute inset-x-0 bottom-0 z-30 flex w-full flex-col overflow-hidden transition-[height] duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[height] ${
                 open ? "h-[min(70vh,30rem)]" : "h-14"
               }`
-            : `console-panel absolute right-0 top-0 z-30 flex h-full flex-col overflow-hidden transition-[width] duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[width] ${
+            : `console-panel absolute right-0 top-0 bottom-9 z-30 flex flex-col overflow-hidden transition-[width] duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[width] ${
                 open ? "w-[min(12rem,80vw)]" : "w-14"
               }`
         }
