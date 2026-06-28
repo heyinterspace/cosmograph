@@ -22,10 +22,10 @@ export function FlyHud() {
       <AnimatePresence>
         {showHint && (
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            className="pointer-events-none absolute bottom-28 left-1/2 z-20 -translate-x-1/2 glass-panel flex items-center gap-3 px-5 py-3"
+            exit={{ opacity: 0, y: -10 }}
+            className="pointer-events-none absolute top-20 left-1/2 z-20 -translate-x-1/2 glass-panel flex items-center gap-3 px-5 py-3"
           >
             <Move3d size={16} className="shrink-0 text-accent" />
             <span className="text-sm text-ink">
