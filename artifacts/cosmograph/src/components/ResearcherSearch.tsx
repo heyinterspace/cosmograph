@@ -64,6 +64,9 @@ export function ResearcherSearch() {
 
   return (
     <div>
+      <p className="mb-3 font-mono text-[10px] leading-relaxed text-ink-dim/70">
+        Now exploring: <span className="text-ink-dim">{activeAuthorLabel}</span>
+      </p>
       <div className="relative">
         <Search
           size={15}
@@ -125,10 +128,6 @@ export function ResearcherSearch() {
           No researchers found for "{query.trim()}".
         </p>
       )}
-
-      <p className="mt-3 font-mono text-[10px] leading-relaxed text-ink-dim/70">
-        Now exploring: <span className="text-ink-dim">{activeAuthorLabel}</span>
-      </p>
     </div>
   );
 }
