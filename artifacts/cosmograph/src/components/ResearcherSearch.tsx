@@ -75,7 +75,7 @@ export function ResearcherSearch() {
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search by name (e.g. Jennifer Doudna)"
           aria-label="Search for a researcher by name"
-          className="w-full border-2 border-edge bg-bg/60 py-2.5 pl-9 pr-9 font-display text-sm text-ink placeholder:text-ink-dim/60 outline-none transition-colors focus:border-accent/70"
+          className="w-full border-2 border-edge bg-bg/60 py-2.5 pl-9 pr-9 text-sm text-ink placeholder:text-ink-dim/60 outline-none transition-colors focus:border-accent/70"
         />
         {searching && (
           <Loader2
