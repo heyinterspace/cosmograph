@@ -141,6 +141,14 @@ export function Sidebar() {
       id: "controls",
       items: [
         {
+          kind: "custom",
+          id: "camera",
+          label: "Orbit / Fly",
+          expanded: <CameraToggle />,
+          rail: <CameraToggleRail />,
+          railTip: true,
+        },
+        {
           kind: "action",
           id: "info",
           label: "Info",
@@ -229,8 +237,6 @@ export function Sidebar() {
               </div>
 
               <ConsoleBody sections={sections} />
-
-              <CameraFooter />
             </motion.div>
           ) : (
             <motion.div
@@ -273,8 +279,6 @@ export function Sidebar() {
               </div>
 
               <RailBody sections={sections} horizontal={isMobile} />
-
-              <CameraFooterRail horizontal={isMobile} />
             </motion.div>
           )}
         </AnimatePresence>
@@ -357,44 +361,6 @@ function CameraToggleRail() {
         <Lock size={10} className="absolute -right-1 -top-1 text-accent" />
       )}
     </button>
-  );
-}
-
-/**
- * Orbit/Fly pinned to the bottom of the expanded console — the primary view
- * control sits at the end of the navbar, separated from the action list above.
- */
-function CameraFooter() {
-  return (
-    <div className="shrink-0 border-t-2 border-edge p-3">
-      <CameraToggle />
-    </div>
-  );
-}
-
-/**
- * Orbit/Fly pinned to the end of the collapsed rail: the bottom on the desktop
- * vertical rail, the trailing (right) edge on the mobile bottom dock.
- */
-function CameraFooterRail({ horizontal }: { horizontal: boolean }) {
-  if (horizontal) {
-    return (
-      <div className="flex shrink-0 items-center justify-center border-l-2 border-edge px-1.5">
-        <div className="flex flex-col items-center justify-center gap-0.5">
-          <CameraToggleRail />
-          <span className="max-w-[3.75rem] truncate font-display text-[8px] uppercase leading-none tracking-wide text-ink-dim">
-            Orbit / Fly
-          </span>
-        </div>
-      </div>
-    );
-  }
-  return (
-    <div className="flex shrink-0 items-center justify-center border-t-2 border-edge p-1.5">
-      <RailTip label="Orbit / Fly">
-        <CameraToggleRail />
-      </RailTip>
-    </div>
   );
 }
 
